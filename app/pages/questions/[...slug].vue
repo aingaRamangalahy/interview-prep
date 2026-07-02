@@ -89,9 +89,9 @@ const question = computed(() =>
         Ideal Answer
       </p>
       <div class="prose prose-invert max-w-none">
-        <ContentRenderer
-          v-if="question.body"
-          :value="question"
+        <MarkdownContent
+          v-if="question.answer"
+          :content="question.answer"
         />
       </div>
     </UCard>

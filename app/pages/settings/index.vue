@@ -42,19 +42,25 @@ function downloadExport() {
 
 function handleImport() {
   if (!importText.value.trim()) return
-  try {
-    importState(importText.value)
-    importText.value = ''
-    useToast().add({ title: 'Progress imported', color: 'success' })
-  } catch {
-    useToast().add({ title: 'Invalid backup file', color: 'error' })
-  }
+  importState(importText.value)
+    .then(() => {
+      importText.value = ''
+      useToast().add({ title: 'Progress imported', color: 'success' })
+    })
+    .catch(() => {
+      useToast().add({ title: 'Invalid backup file', color: 'error' })
+    })
 }
 
 function handleReset() {
   resetProgress()
-  showResetConfirm.value = false
-  useToast().add({ title: 'Progress reset', color: 'warning' })
+    .then(() => {
+      showResetConfirm.value = false
+      useToast().add({ title: 'Progress reset', color: 'warning' })
+    })
+    .catch(() => {
+      useToast().add({ title: 'Failed to reset progress', color: 'error' })
+    })
 }
 </script>
 
@@ -118,7 +124,7 @@ function handleReset() {
             Export progress
           </p>
           <p class="text-sm text-muted">
-            Download your review history and streak data.
+            Download your review history and streak data from MongoDB.
           </p>
           <UButton
             class="mt-3"

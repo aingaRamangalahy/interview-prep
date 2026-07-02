@@ -22,7 +22,7 @@ const filteredQuestions = computed(() =>
         Questions
       </h1>
       <p class="text-muted">
-        Browse your question library. Edit questions by updating Markdown files in the repo.
+        Browse your question library stored in MongoDB.
       </p>
     </section>
 

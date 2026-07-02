@@ -1,8 +1,6 @@
 import type { AppState, AppSettings, SessionRecord } from '~/types'
 import { createReviewState, updateStreak } from '~/utils/srs'
 
-const STORAGE_KEY = 'interview-prep-state'
-
 const DEFAULT_SETTINGS: AppSettings = {
   sessionSize: 5,
   defaultPracticeMode: 'mixed',
@@ -20,26 +18,43 @@ function createDefaultState(): AppState {
   }
 }
 
+let persistTimer: ReturnType<typeof setTimeout> | null = null
+
 export function useReviewState() {
   const state = useState<AppState>('review-state', createDefaultState)
   const hydrated = useState('review-state-hydrated', () => false)
+  const syncing = useState('review-state-syncing', () => false)
 
-  function hydrate() {
+  async function hydrate() {
     if (!import.meta.client || hydrated.value) return
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      try {
-        state.value = { ...createDefaultState(), ...JSON.parse(raw) }
-      } catch {
-        state.value = createDefaultState()
-      }
+
+    try {
+      const data = await $fetch<AppState>('/api/state')
+      state.value = { ...createDefaultState(), ...data }
+    } catch {
+      state.value = createDefaultState()
     }
+
     hydrated.value = true
   }
 
   function persist() {
     if (!import.meta.client || !hydrated.value) return
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.value))
+
+    if (persistTimer) clearTimeout(persistTimer)
+    persistTimer = setTimeout(async () => {
+      syncing.value = true
+      try {
+        await $fetch('/api/state', {
+          method: 'PUT',
+          body: state.value
+        })
+      } catch {
+        // Keep local state; user can retry on next change
+      } finally {
+        syncing.value = false
+      }
+    }, 400)
   }
 
   if (import.meta.client) {
@@ -79,23 +94,30 @@ export function useReviewState() {
     return JSON.stringify(state.value, null, 2)
   }
 
-  function importState(json: string) {
+  async function importState(json: string) {
     const parsed = JSON.parse(json) as AppState
     state.value = { ...createDefaultState(), ...parsed }
-    persist()
+    await $fetch('/api/state', {
+      method: 'PUT',
+      body: state.value
+    })
   }
 
-  function resetProgress() {
+  async function resetProgress() {
     state.value = {
       ...createDefaultState(),
       settings: state.value.settings
     }
-    persist()
+    await $fetch('/api/state', {
+      method: 'PUT',
+      body: state.value
+    })
   }
 
   return {
     state,
     hydrated,
+    syncing,
     hydrate,
     getReview,
     ensureReview,

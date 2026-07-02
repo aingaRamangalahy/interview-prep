@@ -75,10 +75,10 @@ function handleKeydown(event: KeyboardEvent) {
   if (!showAnswer.value) return
 
   const ratingMap: Record<string, Rating> = {
-    '1': 'again',
-    '2': 'hard',
-    '3': 'good',
-    '4': 'easy'
+    1: 'again',
+    2: 'hard',
+    3: 'good',
+    4: 'easy'
   }
 
   if (ratingMap[event.key]) {
@@ -192,9 +192,9 @@ function exitSession() {
         v-if="showAnswer"
         class="prose prose-invert max-w-none"
       >
-        <ContentRenderer
-          v-if="currentQuestion.body"
-          :value="currentQuestion"
+        <MarkdownContent
+          v-if="currentQuestion.answer"
+          :content="currentQuestion.answer"
         />
         <p
           v-else

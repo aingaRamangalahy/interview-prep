@@ -37,7 +37,7 @@ export interface Question {
   tags: string[]
   source?: string
   notes?: string
-  body?: unknown
+  answer: string
   path: string
 }
 

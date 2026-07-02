@@ -2,8 +2,7 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
-    '@nuxt/ui',
-    '@nuxt/content'
+    '@nuxt/ui'
   ],
 
   devtools: {
@@ -17,6 +16,14 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2026-06-30',
+
+  runtimeConfig: {
+    mongodbUri: process.env.MONGODB_URI || '',
+    appUserId: process.env.APP_USER_ID || 'default',
+    public: {
+      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    }
+  },
 
   eslint: {
     config: {
