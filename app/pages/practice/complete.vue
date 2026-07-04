@@ -24,15 +24,18 @@ onMounted(() => {
     class="flex flex-1 flex-col items-center justify-center gap-8 py-12 text-center"
   >
     <div class="space-y-2">
-      <p class="text-4xl">
+      <p class="text-5xl">
         🎉
       </p>
       <h1 class="text-2xl font-semibold text-highlighted">
         Session Complete
       </h1>
+      <p class="text-sm text-muted">
+        Nice work. Another focused step toward mastery.
+      </p>
     </div>
 
-    <UCard class="w-full max-w-md text-left">
+    <UCard class="w-full max-w-xl border-primary/20 text-left">
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
           <p class="text-sm text-muted">
@@ -69,14 +72,11 @@ onMounted(() => {
       </div>
     </UCard>
 
-    <p class="text-muted">
-      Keep your streak alive — come back tomorrow.
-    </p>
-
     <div class="flex flex-wrap justify-center gap-3">
       <UButton
         to="/"
         size="lg"
+        icon="i-lucide-layout-dashboard"
       >
         Dashboard
       </UButton>
@@ -85,6 +85,7 @@ onMounted(() => {
         color="neutral"
         variant="soft"
         size="lg"
+        icon="i-lucide-rotate-ccw"
       >
         Practice Again
       </UButton>

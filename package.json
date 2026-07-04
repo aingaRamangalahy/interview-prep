@@ -9,8 +9,8 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "migrate:content": "node scripts/migrate-content-to-mongo.mjs",
-    "migrate:content:dry": "node scripts/migrate-content-to-mongo.mjs --dry-run"
+    "migrate:content": "node --env-file=.env scripts/migrate-content-to-mongo.mjs",
+    "migrate:content:dry": "node --env-file=.env scripts/migrate-content-to-mongo.mjs --dry-run"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",

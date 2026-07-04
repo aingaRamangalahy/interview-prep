@@ -66,11 +66,11 @@ function handleReset() {
 
 <template>
   <div class="space-y-8">
-    <section class="space-y-1">
-      <h1 class="text-2xl font-semibold tracking-tight text-highlighted">
+    <section class="space-y-2 rounded-2xl border border-default/80 bg-elevated/35 p-5 sm:p-6">
+      <h1 class="text-2xl font-semibold tracking-tight text-highlighted sm:text-3xl">
         Settings
       </h1>
-      <p class="text-muted">
+      <p class="text-sm text-muted sm:text-base">
         Customize your daily practice defaults.
       </p>
     </section>
@@ -86,6 +86,9 @@ function handleReset() {
             max="20"
             class="mt-2"
           />
+          <p class="mt-1 text-xs text-muted">
+            Recommended: 5-12 questions for a focused daily session.
+          </p>
         </div>
 
         <div>
@@ -99,7 +102,10 @@ function handleReset() {
       </div>
     </UCard>
 
-    <UCard v-if="defaultMode === 'custom'">
+    <UCard
+      v-if="defaultMode === 'custom'"
+      class="border-primary/20"
+    >
       <p class="mb-3 text-sm font-medium">
         Custom topics
       </p>
@@ -143,6 +149,9 @@ function handleReset() {
           <p class="font-medium">
             Import progress
           </p>
+          <p class="mt-1 text-sm text-muted">
+            Paste the JSON from a previous export and restore your history.
+          </p>
           <UTextarea
             v-model="importText"
             class="mt-2"
@@ -162,7 +171,7 @@ function handleReset() {
       </div>
     </UCard>
 
-    <UCard>
+    <UCard class="border-error/25">
       <p class="font-medium text-error">
         Danger zone
       </p>

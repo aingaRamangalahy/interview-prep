@@ -16,11 +16,11 @@ const { state } = useReviewState()
 
 <template>
   <div class="space-y-8">
-    <section class="space-y-1">
-      <h1 class="text-2xl font-semibold tracking-tight text-highlighted">
+    <section class="space-y-2 rounded-2xl border border-default/80 bg-elevated/35 p-5 sm:p-6">
+      <h1 class="text-2xl font-semibold tracking-tight text-highlighted sm:text-3xl">
         Statistics
       </h1>
-      <p class="text-muted">
+      <p class="text-sm text-muted sm:text-base">
         Track your progress over time.
       </p>
     </section>
@@ -38,7 +38,7 @@ const { state } = useReviewState()
 
     <div
       v-else
-      class="grid gap-4 sm:grid-cols-2"
+      class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
     >
       <UCard>
         <p class="text-sm text-muted">
@@ -129,14 +129,22 @@ const { state } = useReviewState()
       <h2 class="text-sm font-medium text-muted uppercase tracking-wide">
         Topic Confidence
       </h2>
-      <div class="space-y-4">
-        <TopicProgressBar
-          v-for="topic in topicStats.filter(t => t.confidence > 0)"
-          :key="topic.subcategory"
-          :label="`${topic.label} (${topic.confidence}%)`"
-          :progress="topic.confidence"
-        />
-      </div>
+      <UCard>
+        <div class="space-y-4">
+          <TopicProgressBar
+            v-for="topic in topicStats.filter(t => t.confidence > 0)"
+            :key="topic.subcategory"
+            :label="`${topic.label} (${topic.confidence}%)`"
+            :progress="topic.confidence"
+          />
+          <p
+            v-if="topicStats.filter(t => t.confidence > 0).length === 0"
+            class="text-sm text-muted"
+          >
+            Complete more sessions to build confidence insights.
+          </p>
+        </div>
+      </UCard>
     </section>
   </div>
 </template>

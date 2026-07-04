@@ -16,14 +16,14 @@ function isActive(path: string) {
 </script>
 
 <template>
-  <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-default bg-default/95 backdrop-blur lg:hidden">
-    <div class="mx-auto flex max-w-lg items-stretch justify-around px-2 py-2">
+  <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-default/80 bg-default/90 backdrop-blur lg:hidden">
+    <div class="mx-auto flex max-w-xl items-stretch justify-around px-2 py-2">
       <NuxtLink
         v-for="link in links"
         :key="link.to"
         :to="link.to"
-        class="flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px]"
-        :class="isActive(link.to) ? 'text-primary' : 'text-muted'"
+        class="flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] transition-colors"
+        :class="isActive(link.to) ? 'bg-primary/12 text-primary' : 'text-muted'"
       >
         <UIcon
           :name="link.icon"

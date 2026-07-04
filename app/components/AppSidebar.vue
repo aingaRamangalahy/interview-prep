@@ -16,12 +16,14 @@ function isActive(path: string) {
 </script>
 
 <template>
-  <aside class="hidden lg:flex lg:w-56 lg:flex-col lg:border-r lg:border-default lg:bg-elevated/30 lg:px-4 lg:py-6">
+  <aside class="hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-64 lg:flex-col lg:border-r lg:border-default/80 lg:bg-default/60 lg:px-4 lg:py-6">
     <NuxtLink
       to="/"
-      class="mb-8 px-2 text-lg font-semibold tracking-tight text-highlighted"
+      class="mb-8 rounded-xl border border-default/80 bg-elevated/50 px-4 py-3"
     >
-      Interview Prep
+      <p class="text-lg font-semibold tracking-tight text-highlighted">
+        Interview Prep
+      </p>
     </NuxtLink>
 
     <nav class="flex flex-1 flex-col gap-1">
@@ -29,17 +31,26 @@ function isActive(path: string) {
         v-for="link in links"
         :key="link.to"
         :to="link.to"
-        class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors"
+        class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all"
         :class="isActive(link.to)
-          ? 'bg-primary/10 text-primary font-medium'
-          : 'text-muted hover:bg-elevated hover:text-highlighted'"
+          ? 'bg-primary/12 text-primary font-medium shadow-sm'
+          : 'text-muted hover:bg-elevated/80 hover:text-highlighted'"
       >
         <UIcon
           :name="link.icon"
-          class="size-4"
+          class="size-4 transition-transform group-hover:scale-110"
         />
         {{ link.label }}
       </NuxtLink>
     </nav>
+
+    <UCard class="mt-5 bg-elevated/40">
+      <p class="text-xs text-muted">
+        Tip of the day
+      </p>
+      <p class="mt-1 text-sm text-highlighted">
+        Keep sessions short and daily for stronger long-term recall.
+      </p>
+    </UCard>
   </aside>
 </template>

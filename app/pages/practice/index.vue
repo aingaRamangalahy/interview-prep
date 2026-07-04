@@ -24,11 +24,11 @@ function beginSession() {
 
 <template>
   <div class="space-y-6">
-    <section class="space-y-1">
-      <h1 class="text-2xl font-semibold tracking-tight text-highlighted">
+    <section class="space-y-2 rounded-2xl border border-default/80 bg-elevated/35 p-5 sm:p-6">
+      <h1 class="text-2xl font-semibold tracking-tight text-highlighted sm:text-3xl">
         Practice
       </h1>
-      <p class="text-muted">
+      <p class="text-sm text-muted sm:text-base">
         Choose a mode and start today's session.
       </p>
     </section>
@@ -38,50 +38,59 @@ function beginSession() {
         v-for="option in PRACTICE_MODE_OPTIONS"
         :key="option.value"
         type="button"
-        class="rounded-xl border border-default bg-elevated/40 p-4 text-left transition-colors hover:border-primary/40"
-        :class="selectedMode === option.value ? 'border-primary ring-1 ring-primary/30' : ''"
+        class="rounded-2xl border border-default bg-elevated/30 p-4 text-left transition-all hover:border-primary/35 hover:bg-elevated/55"
+        :class="selectedMode === option.value ? 'border-primary ring-1 ring-primary/35 bg-primary/6' : ''"
         @click="selectedMode = option.value"
       >
-        <div class="font-medium text-highlighted">
-          {{ option.label }}
-        </div>
-        <div
-          v-if="option.description"
-          class="mt-1 text-sm text-muted"
-        >
-          {{ option.description }}
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="font-medium text-highlighted">
+              {{ option.label }}
+            </div>
+            <div
+              v-if="option.description"
+              class="mt-1 text-sm text-muted"
+            >
+              {{ option.description }}
+            </div>
+          </div>
+          <UIcon
+            v-if="selectedMode === option.value"
+            name="i-lucide-check-circle-2"
+            class="size-5 text-primary"
+          />
         </div>
       </button>
     </div>
 
-    <UCard>
-      <div class="space-y-4">
+    <UCard class="border-primary/20">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-sm text-muted">
             Ready for review
           </p>
-          <p class="text-lg font-semibold">
+          <p class="text-xl font-semibold text-highlighted">
             {{ dueCount }} question{{ dueCount === 1 ? '' : 's' }}
           </p>
         </div>
 
         <UButton
           size="lg"
-          block
           :loading="pending"
           :disabled="dueCount === 0"
+          icon="i-lucide-play"
           @click="beginSession"
         >
           Start Session
         </UButton>
-
-        <p
-          v-if="dueCount === 0 && !pending"
-          class="text-sm text-muted"
-        >
-          No questions due for this mode. Try another mode or add more questions.
-        </p>
       </div>
+
+      <p
+        v-if="dueCount === 0 && !pending"
+        class="mt-3 text-sm text-muted"
+      >
+        No questions are due for this mode yet. Try a different mode or add more questions.
+      </p>
     </UCard>
   </div>
 </template>

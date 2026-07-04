@@ -109,8 +109,12 @@ function exitSession() {
 
   <div
     v-else-if="!currentQuestion"
-    class="flex flex-1 flex-col items-center justify-center gap-4 text-center"
+    class="flex flex-1 flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-default p-10 text-center"
   >
+    <UIcon
+      name="i-lucide-notebook-pen"
+      class="size-8 text-muted"
+    />
     <p class="text-muted">
       No questions available for this session.
     </p>
@@ -123,19 +127,26 @@ function exitSession() {
     v-else
     class="flex flex-1 flex-col gap-8"
   >
-    <div class="flex items-center justify-between text-sm text-muted">
-      <span>Question {{ sessionProgress.current }} / {{ sessionProgress.total }}</span>
-      <UButton
-        color="neutral"
-        variant="ghost"
-        size="sm"
-        @click="exitSession"
-      >
-        Exit
-      </UButton>
+    <div class="space-y-3">
+      <div class="flex items-center justify-between text-sm text-muted">
+        <span>Question {{ sessionProgress.current }} / {{ sessionProgress.total }}</span>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          icon="i-lucide-x"
+          @click="exitSession"
+        >
+          Exit
+        </UButton>
+      </div>
+      <UProgress
+        :model-value="Math.round((sessionProgress.current / sessionProgress.total) * 100)"
+        size="xs"
+      />
     </div>
 
-    <div class="space-y-3">
+    <div class="space-y-3 rounded-2xl border border-default/80 bg-elevated/35 p-5 sm:p-6">
       <div class="flex flex-wrap items-center gap-2">
         <UBadge
           color="neutral"
@@ -156,8 +167,6 @@ function exitSession() {
       </h1>
     </div>
 
-    <USeparator />
-
     <div class="space-y-4">
       <UButton
         v-if="!showHint && currentQuestion.hint"
@@ -170,7 +179,7 @@ function exitSession() {
 
       <UCard
         v-if="showHint && currentQuestion.hint"
-        class="border-dashed"
+        class="border-dashed bg-warning/5"
       >
         <p class="text-sm text-muted">
           {{ currentQuestion.hint }}
@@ -180,6 +189,7 @@ function exitSession() {
       <UButton
         v-if="!showAnswer"
         size="lg"
+        icon="i-lucide-eye"
         @click="revealAnswer"
       >
         Reveal Answer

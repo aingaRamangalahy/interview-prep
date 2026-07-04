@@ -25,7 +25,8 @@ const keepFiles = args.has('--keep-files')
 
 const MONGODB_URI = process.env.MONGODB_URI
 if (!MONGODB_URI) {
-  console.error('MONGODB_URI is required. Set it in .env or pass it inline.')
+  console.error('MONGODB_URI is required. Set it in .env or pass it inline:')
+  console.error('  MONGODB_URI="mongodb+srv://..." pnpm migrate:content')
   process.exit(1)
 }
 

@@ -26,8 +26,12 @@ const question = computed(() =>
 
   <div
     v-else-if="!question"
-    class="space-y-4 text-center"
+    class="space-y-4 rounded-2xl border border-dashed border-default p-10 text-center"
   >
+    <UIcon
+      name="i-lucide-file-question"
+      class="mx-auto size-6 text-muted"
+    />
     <p class="text-muted">
       Question not found.
     </p>
@@ -50,7 +54,7 @@ const question = computed(() =>
       Back
     </UButton>
 
-    <div class="space-y-3">
+    <div class="space-y-3 rounded-2xl border border-default/80 bg-elevated/30 p-5 sm:p-6">
       <div class="flex flex-wrap items-center gap-2">
         <UBadge
           color="neutral"
@@ -74,7 +78,7 @@ const question = computed(() =>
 
     <UCard
       v-if="question.hint"
-      class="border-dashed"
+      class="border-dashed bg-warning/5"
     >
       <p class="text-sm font-medium text-muted">
         Hint
@@ -93,6 +97,12 @@ const question = computed(() =>
           v-if="question.answer"
           :content="question.answer"
         />
+        <p
+          v-else
+          class="text-sm text-muted"
+        >
+          No answer content yet.
+        </p>
       </div>
     </UCard>
   </div>
