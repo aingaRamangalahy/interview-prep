@@ -1,185 +1,165 @@
-# Deploy — Interview Prep on DigitalOcean
+# Deploy — Vercel + MongoDB Atlas
 
-Deploy the full-stack app (Nuxt + MongoDB) to a small DigitalOcean droplet, served at a subdomain of **ainga.me**.
-
-> **Prerequisites:** Complete [droplet-setup.md](./droplet-setup.md) first (server, DNS, Docker, Caddy).
+Deploy the full-stack app (Nuxt on Vercel, MongoDB on Atlas) at **interview.ainga.me**.
 
 ---
 
 ## Architecture
 
 ```
-Internet
+Browser
    │
    ▼
-Caddy (443) ──► interview.ainga.me
+Vercel (Nuxt SSR + /api/* serverless functions)
    │
    ▼
-Docker: app container (:3000)
-   │
-   ▼
-Docker: mongodb container (internal only)
+MongoDB Atlas M0 (free tier)
 ```
 
-MongoDB is **not** exposed publicly — only the `app` service talks to it on the Docker network.
+- **Frontend + API:** Vercel Hobby (free)
+- **Database:** MongoDB Atlas M0 (free, 512 MB)
+- **DNS:** `interview.ainga.me` → Vercel
 
 ---
 
-## 1. Clone the repository on the droplet
+## 1. MongoDB Atlas setup
 
-```bash
-cd /opt
-sudo git clone https://github.com/YOUR_USER/interview-prep.git
-sudo chown -R $USER:$USER interview-prep
-cd interview-prep
+1. Create a free account at [mongodb.com/atlas](https://www.mongodb.com/atlas)
+2. **Create → Shared → M0 FREE** cluster (pick a region close to your Vercel region)
+3. **Database Access → Add Database User**
+   - Username + strong password
+   - Built-in role: `readWriteAnyDatabase` (or scoped to `interview-prep`)
+4. **Network Access → Add IP Address**
+   - For development + Vercel: **Allow Access from Anywhere** (`0.0.0.0/0`)
+   - Vercel serverless functions use dynamic IPs; restrict further only if you use Vercel Static IPs (Pro)
+5. **Database → Connect → Drivers** — copy the connection string:
+
 ```
+mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/interview-prep?retryWrites=true&w=majority
+```
+
+Replace `<password>` with your URL-encoded password.
 
 ---
 
-## 2. Configure environment
+## 2. Migrate questions to Atlas
+
+Run locally with your Atlas URI in `.env`:
 
 ```bash
 cp .env.example .env
-nano .env
-```
+# Edit .env — set MONGODB_URI to your Atlas connection string
 
-Production `.env` example:
-
-```env
-MONGO_ROOT_USERNAME=root
-MONGO_ROOT_PASSWORD=<strong-random-password>
-MONGODB_URI=mongodb://root:<strong-random-password>@mongodb:27017/interview-prep?authSource=admin
-APP_USER_ID=default
-NUXT_PUBLIC_APP_URL=https://interview.ainga.me
-APP_PORT=3000
-```
-
-Generate a password:
-
-```bash
-openssl rand -base64 32
-```
-
----
-
-## 3. Migrate content (first deploy only)
-
-> **Skip this step if you already ran `pnpm migrate:content` in development** and your MongoDB
-> volume was exported and transferred to the droplet, or if you are redeploying an existing instance.
-
-If this is a brand-new server and you have no existing MongoDB data, run the migration against
-the production stack:
-
-```bash
-# Start the full stack first (MongoDB must be healthy before migration)
-docker compose up -d --build
-
-# Wait for MongoDB to be healthy
-docker compose ps
-
-# Install dependencies on the host (one-time, for the migration script)
 pnpm install
-
-# Run migration
-MONGODB_URI="mongodb://root:<password>@127.0.0.1:27017/interview-prep?authSource=admin" \
-  pnpm migrate:content
-
-# Verify the count via mongosh inside the container
-docker compose exec mongodb mongosh \
-  --uri "mongodb://root:<password>@localhost:27017/interview-prep?authSource=admin" \
-  --eval 'db.questions.countDocuments()'
+pnpm migrate:content:dry   # preview
+pnpm migrate:content      # import Markdown → Atlas, remove content/
 ```
 
-> The migration script connects to MongoDB using `MONGODB_URI`. In production the container port is
-> not published; use `docker-compose.dev.yml` only on your local machine. On the server, temporarily
-> add `127.0.0.1:27017:27017` to the mongodb `ports` block, run the migration, then remove it again.
+Verify in Atlas UI: **Browse Collections → interview-prep → questions**.
 
 ---
 
-## 4. Build and start production stack
+## 3. Deploy to Vercel
+
+### Option A — Vercel CLI
 
 ```bash
-docker compose up -d --build
+npm i -g vercel
+vercel login
+vercel link
+vercel env add MONGODB_URI
+vercel env add APP_USER_ID
+vercel env add NUXT_PUBLIC_APP_URL
+vercel --prod
 ```
 
-Verify:
+### Option B — GitHub integration (recommended)
+
+1. Push the repo to GitHub
+2. [vercel.com/new](https://vercel.com/new) → Import repository
+3. Framework: **Nuxt.js** (auto-detected)
+4. Add **Environment Variables**:
+
+| Variable | Value | Environments |
+|---|---|---|
+| `MONGODB_URI` | `mongodb+srv://...` | Production, Preview, Development |
+| `APP_USER_ID` | `default` | Production, Preview, Development |
+| `NUXT_PUBLIC_APP_URL` | `https://interview.ainga.me` | Production |
+| `NUXT_PUBLIC_APP_URL` | `https://<preview-url>.vercel.app` | Preview |
+
+5. Deploy
+
+---
+
+## 4. Custom domain — interview.ainga.me
+
+1. Vercel project → **Settings → Domains → Add**
+2. Enter `interview.ainga.me`
+3. Vercel shows the required DNS record. At your DNS provider for **ainga.me**:
+
+| Type | Name | Value |
+|---|---|---|
+| **CNAME** | `interview` | `cname.vercel-dns.com` |
+
+4. Wait for DNS propagation (minutes to hours)
+5. Vercel provisions HTTPS automatically
+
+Update production env:
+
+```
+NUXT_PUBLIC_APP_URL=https://interview.ainga.me
+```
+
+Redeploy if you changed env vars after the first deploy.
+
+---
+
+## 5. Verify
 
 ```bash
-docker compose ps
-curl -s http://localhost:3000/api/health
+curl https://interview.ainga.me/api/health
 # {"status":"ok","database":"connected"}
+
+curl https://interview.ainga.me/api/questions | head -c 200
+```
+
+Open the app, start a practice session, rate a question — progress should persist in Atlas (`user_states` collection).
+
+---
+
+## 6. Local development
+
+Use the same Atlas cluster for local dev (simplest — no local MongoDB needed):
+
+```bash
+cp .env.example .env
+# MONGODB_URI=mongodb+srv://...
+pnpm dev
+```
+
+Or use a separate Atlas database/user for dev vs production.
+
+---
+
+## 7. Redeploys
+
+Every push to `main` auto-deploys if GitHub integration is connected.
+
+Manual:
+
+```bash
+vercel --prod
 ```
 
 ---
 
-## 5. Caddy reverse proxy
+## 8. Backups (Atlas)
 
-Caddy should already be configured in [droplet-setup.md](./droplet-setup.md). Confirm `/etc/caddy/Caddyfile` contains the hardened config (see droplet-setup.md §7). Then reload:
+M0 free tier has **no automated backups**. Options:
 
-```bash
-sudo caddy validate --config /etc/caddy/Caddyfile
-sudo systemctl reload caddy
-```
-
-Visit **https://interview.ainga.me**.
-
----
-
-## 6. Updates (redeploy)
-
-```bash
-cd /opt/interview-prep
-git pull
-docker compose up -d --build --remove-orphans
-```
-
-- `--remove-orphans` removes containers for services no longer in the compose file.
-- MongoDB data persists in the `mongo_data` Docker volume across all rebuilds.
-- The `app` service depends on `mongodb:healthy`, so the app only starts after Mongo is ready.
-
----
-
-## 7. Backups
-
-### MongoDB dump
-
-```bash
-# Dump inside the container
-docker compose exec mongodb mongodump \
-  --uri "mongodb://root:<password>@localhost:27017/?authSource=admin" \
-  --db interview-prep \
-  --out /data/backup/$(date +%Y%m%d)
-
-# Copy dump from container to host
-docker compose cp mongodb:/data/backup ./backups
-```
-
-`mongodump` creates a subdirectory per database: `<out>/interview-prep/`.
-
-### Restore
-
-```bash
-# Copy the dated folder back into the container
-docker compose cp ./backups/20260701 mongodb:/data/restore
-
-# mongorestore expects the database directory (not the date folder)
-docker compose exec mongodb mongorestore \
-  --uri "mongodb://root:<password>@localhost:27017/?authSource=admin" \
-  --db interview-prep \
-  /data/restore/20260701/interview-prep
-```
-
----
-
-## 8. Monitoring
-
-| Check | Command |
-|---|---|
-| App logs | `docker compose logs -f app` |
-| Mongo logs | `docker compose logs -f mongodb` |
-| Health | `curl https://interview.ainga.me/api/health` |
-| Disk | `df -h` |
-| Memory | `free -h` |
+- **Manual export:** Atlas → Cluster → … → Export Data
+- **Upgrade to M2+** for continuous cloud backup
+- **Script:** run `mongodump` locally against Atlas URI periodically
 
 ---
 
@@ -187,10 +167,11 @@ docker compose exec mongodb mongorestore \
 
 | Symptom | Fix |
 |---|---|
-| `Database unavailable` | Check `MONGODB_URI` matches compose credentials; `docker compose logs mongodb` |
-| 502 from Caddy | App not running — `docker compose ps`, restart app |
-| SSL error | DNS not propagated; check `dig interview.ainga.me` |
-| Empty question list | Run `pnpm migrate:content` or restore MongoDB backup |
+| `Database unavailable` | Check `MONGODB_URI` in Vercel env; verify Atlas IP allowlist includes `0.0.0.0/0` |
+| `Authentication failed` | URL-encode special chars in password; verify user + database name |
+| Empty question list | Run `pnpm migrate:content` against Atlas |
+| 500 on cold start | Normal on free tier; retry — check Vercel function logs |
+| Domain not working | Confirm CNAME points to `cname.vercel-dns.com`; check Vercel domain status |
 
 ---
 
@@ -198,9 +179,17 @@ docker compose exec mongodb mongorestore \
 
 | Variable | Description |
 |---|---|
-| `MONGODB_URI` | Mongo connection string (app container) |
-| `APP_USER_ID` | Key for user progress document |
-| `NUXT_PUBLIC_APP_URL` | Public URL (canonical) |
-| `MONGO_ROOT_USERNAME` | Mongo root user (compose) |
-| `MONGO_ROOT_PASSWORD` | Mongo root password (compose) |
-| `APP_PORT` | Host port mapped to app (default 3000) |
+| `MONGODB_URI` | Atlas connection string (`mongodb+srv://...`) |
+| `APP_USER_ID` | Key for user progress document in `user_states` |
+| `NUXT_PUBLIC_APP_URL` | Public canonical URL |
+
+---
+
+## Vercel free tier notes
+
+- **Hobby plan** — personal/non-commercial use
+- **Cold starts** — first request after idle may be slower
+- **Function timeout** — 10 seconds (more than enough for this app)
+- **Bandwidth** — 100 GB/month
+
+For a personal interview prep app, this is sufficient.

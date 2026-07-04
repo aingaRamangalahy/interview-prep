@@ -1,28 +1,30 @@
 # Interview Prep
 
-Daily interview practice app with spaced repetition. Full-stack Nuxt 4 app with MongoDB.
+Daily interview practice app with spaced repetition. Full-stack Nuxt 4 app with MongoDB Atlas, deployed on Vercel.
 
 ## Stack
 
 - **Frontend:** Nuxt 4, Vue 3, Nuxt UI
-- **Backend:** Nitro server API routes
-- **Database:** MongoDB
-- **Deploy:** Docker on DigitalOcean
+- **Backend:** Nitro server API routes (Vercel serverless)
+- **Database:** MongoDB Atlas
+- **Deploy:** Vercel (Hobby free tier)
 
 ## Local development
 
-### 1. Start MongoDB
+### 1. Configure environment
 
 ```bash
 cp .env.example .env
-pnpm docker:dev
 ```
+
+Set `MONGODB_URI` to your [MongoDB Atlas](https://www.mongodb.com/atlas) connection string.
 
 ### 2. Install and migrate content
 
 ```bash
 pnpm install
-pnpm migrate:content    # imports Markdown → MongoDB, removes content/
+pnpm migrate:content:dry   # preview
+pnpm migrate:content     # import Markdown → Atlas, remove content/
 ```
 
 ### 3. Run the app
@@ -33,22 +35,13 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Docker (full stack)
-
-```bash
-cp .env.example .env
-pnpm docker:up
-```
-
 ## Commands
 
 | Command | Description |
 |---|---|
-| `pnpm dev` | Dev server (needs MongoDB) |
+| `pnpm dev` | Dev server |
 | `pnpm build` | Production build |
-| `pnpm docker:dev` | Start MongoDB only |
-| `pnpm docker:up` | Start app + MongoDB |
-| `pnpm migrate:content` | Migrate Markdown questions to MongoDB |
+| `pnpm migrate:content` | Migrate Markdown questions to MongoDB Atlas |
 | `pnpm migrate:content:dry` | Preview migration without changes |
 
 ## API
@@ -63,12 +56,11 @@ pnpm docker:up
 
 ## Deploy
 
-- [Droplet setup](./docs/droplet-setup.md) — DigitalOcean + `interview.ainga.me`
-- [Deploy guide](./docs/deploy.md) — production deployment steps
+See [docs/deploy.md](./docs/deploy.md) — Vercel + MongoDB Atlas + `interview.ainga.me`.
 
 ## Data
 
-- **Questions** — stored in MongoDB `questions` collection
-- **Progress** — stored in MongoDB `user_states` collection (keyed by `APP_USER_ID`)
+- **Questions** — MongoDB Atlas `questions` collection
+- **Progress** — MongoDB Atlas `user_states` collection (keyed by `APP_USER_ID`)
 
 See [spec.md](./spec.md) for product details.

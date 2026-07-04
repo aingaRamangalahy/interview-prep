@@ -23,9 +23,11 @@ const args = new Set(process.argv.slice(2))
 const dryRun = args.has('--dry-run')
 const keepFiles = args.has('--keep-files')
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  'mongodb://root:changeme@localhost:27017/interview-prep?authSource=admin'
+const MONGODB_URI = process.env.MONGODB_URI
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI is required. Set it in .env or pass it inline.')
+  process.exit(1)
+}
 
 const VALID_CATEGORIES = new Set(['technical', 'non-technical'])
 const VALID_DIFFICULTIES = new Set(['easy', 'medium', 'hard'])

@@ -17,6 +17,10 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2026-06-30',
 
+  nitro: {
+    preset: process.env.VERCEL ? 'vercel' : undefined
+  },
+
   runtimeConfig: {
     mongodbUri: process.env.MONGODB_URI || '',
     appUserId: process.env.APP_USER_ID || 'default',
