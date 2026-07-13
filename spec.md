@@ -1,8 +1,8 @@
-# Interview Prep App – Product Specification (spec.md)
+# interview-prep – Product Specification (spec.md)
 
 ## Vision
 
-Build a personal interview preparation application designed for daily practice using spaced repetition.
+Build interview-prep — a personal interview preparation application designed for daily practice using spaced repetition.
 
 The application is **not a learning platform**. It is a daily training system that helps me retain knowledge, identify weaknesses, and become interview-ready.
 

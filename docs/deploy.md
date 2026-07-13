@@ -192,4 +192,4 @@ M0 free tier has **no automated backups**. Options:
 - **Function timeout** — 10 seconds (more than enough for this app)
 - **Bandwidth** — 100 GB/month
 
-For a personal interview prep app, this is sufficient.
+For interview-prep, this is sufficient.

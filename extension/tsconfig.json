@@ -1,0 +1,9 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@interview-prep/shared": ["../packages/shared/src/index.ts"],
+      "@interview-prep/shared/*": ["../packages/shared/src/*"]
+    }
+  }
+}

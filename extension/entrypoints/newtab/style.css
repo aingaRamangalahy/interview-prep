@@ -1,0 +1,356 @@
+:root {
+  color-scheme: light;
+  --bg: #f3efe6;
+  --bg-accent: #e7f0ea;
+  --ink: #1c2420;
+  --muted: #5f6b64;
+  --card: rgba(255, 255, 255, 0.72);
+  --border: rgba(28, 36, 32, 0.12);
+  --accent: #1f6b4a;
+  --accent-soft: #d7ebe1;
+  --danger-soft: #f3e2d8;
+  --shadow: 0 18px 50px rgba(28, 36, 32, 0.08);
+  --radius: 18px;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(31, 107, 74, 0.14), transparent 34%),
+    radial-gradient(circle at top right, rgba(196, 122, 68, 0.12), transparent 28%),
+    linear-gradient(180deg, var(--bg-accent), var(--bg) 42%, #efe8db);
+}
+
+button,
+kbd {
+  font: inherit;
+}
+
+.page {
+  width: min(760px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brand-mark {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  object-fit: cover;
+}
+
+.brand-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand-sub,
+.muted,
+.streak-label,
+.complete-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+.streak {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.streak-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  text-align: center;
+}
+
+.complete-title,
+.question-title {
+  margin: 0;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.complete-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.session {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+.progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  color: var(--muted);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.9rem;
+}
+
+.progress-track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: rgba(28, 36, 32, 0.08);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 180ms ease;
+}
+
+.card,
+.answer,
+.hint {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.card {
+  padding: 1.35rem 1.4rem;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge.outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.question-title {
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.hint {
+  padding: 0.95rem 1.1rem;
+  background: var(--danger-soft);
+  color: #6b4630;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+}
+
+.answer {
+  padding: 1.1rem 1.2rem;
+}
+
+.primary-btn,
+.ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 0;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, opacity 140ms ease;
+}
+
+.primary-btn {
+  width: fit-content;
+  padding: 0.85rem 1.15rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #f7f3ea;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-weight: 600;
+}
+
+.primary-btn:hover,
+.ghost-btn:hover,
+.rating-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ghost-btn {
+  width: fit-content;
+  padding: 0.7rem 0.95rem;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.primary-btn kbd,
+.rating-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.16);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+}
+
+.rate-block {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rating-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (min-width: 640px) {
+  .rating-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.rating-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.rating-emoji {
+  font-size: 1.1rem;
+}
+
+.rating-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.rating-label {
+  font-weight: 600;
+}
+
+.rating-desc {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.rating-kbd {
+  background: rgba(28, 36, 32, 0.06);
+  color: var(--muted);
+}
+
+.markdown {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.markdown :first-child {
+  margin-top: 0;
+}
+
+.markdown :last-child {
+  margin-bottom: 0;
+}
+
+.markdown pre {
+  overflow-x: auto;
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+  background: #1c2420;
+  color: #f3efe6;
+}
+
+.markdown code {
+  font-family: "SF Mono", ui-monospace, Menlo, monospace;
+  font-size: 0.88em;
+}
+
+.markdown :not(pre) > code {
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  background: rgba(28, 36, 32, 0.08);
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.2rem;
+}

@@ -1,6 +1,8 @@
-# Interview Prep
+# interview-prep
 
 Daily interview practice app with spaced repetition. Full-stack Nuxt 4 app with MongoDB Atlas, deployed on Vercel.
+
+The browser extension is branded separately as **FlashTab** — see [`extension/`](./extension/).
 
 ## Stack
 

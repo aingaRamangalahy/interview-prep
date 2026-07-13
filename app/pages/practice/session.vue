@@ -167,7 +167,7 @@ function exitSession() {
       </h1>
     </div>
 
-    <div class="space-y-4">
+    <div class=" flex flex-col gap-4">
       <UButton
         v-if="!showHint && currentQuestion.hint"
         color="neutral"

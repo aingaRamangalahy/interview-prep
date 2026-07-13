@@ -1,7 +1,12 @@
+packages:
+  - 'packages/*'
+  - 'extension'
+
 allowBuilds:
   '@parcel/watcher': false
   '@tailwindcss/oxide': false
   better-sqlite3: true
   esbuild: false
+  spawn-sync: true
   unrs-resolver: false
   vue-demi: false

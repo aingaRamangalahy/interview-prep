@@ -1,4 +1,4 @@
-# Interview Prep App — Implementation Todo
+# interview-prep — Implementation Todo
 
 Based on [spec.md](./spec.md). MVP is frontend-only: Nuxt Content for questions, local storage for progress and spaced repetition.
 

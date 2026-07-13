@@ -10,7 +10,11 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "migrate:content": "node --env-file=.env scripts/migrate-content-to-mongo.mjs",
-    "migrate:content:dry": "node --env-file=.env scripts/migrate-content-to-mongo.mjs --dry-run"
+    "migrate:content:dry": "node --env-file=.env scripts/migrate-content-to-mongo.mjs --dry-run",
+    "extension:dev": "pnpm --filter @interview-prep/extension dev",
+    "extension:dev:hmr": "pnpm --filter @interview-prep/extension dev:hmr",
+    "extension:build": "pnpm --filter @interview-prep/extension build",
+    "extension:zip": "pnpm --filter @interview-prep/extension zip"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
