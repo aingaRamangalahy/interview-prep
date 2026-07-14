@@ -149,6 +149,23 @@ export function useGreeting() {
   return 'Good evening'
 }
 
+const TIPS_OF_THE_DAY = [
+  'Keep sessions short and daily for stronger long-term recall.',
+  'Rate honestly — marking "Again" now saves you from forgetting later.',
+  'Explaining an answer out loud sticks better than reading it silently.',
+  'Consistency beats intensity — five focused minutes daily wins.',
+  'Struggling with a topic? Revisit it before moving to the next one.',
+  'Spaced repetition works best when you don\'t skip days.',
+  'Review your weakest topics first, while your focus is freshest.',
+  'One missed day is fine. Two in a row breaks the habit — come back.'
+]
+
+export function useTipOfTheDay() {
+  const startOfYear = new Date(new Date().getFullYear(), 0, 0).getTime()
+  const dayOfYear = Math.floor((Date.now() - startOfYear) / 86400000)
+  return TIPS_OF_THE_DAY[dayOfYear % TIPS_OF_THE_DAY.length]
+}
+
 export function useTodayISO() {
   return todayISO()
 }

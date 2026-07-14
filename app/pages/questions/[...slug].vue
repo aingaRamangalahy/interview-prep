@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatDifficulty, formatSubcategory } from '~/utils/categories'
+import { DIFFICULTY_COLORS, formatDifficulty, formatSubcategory, SUBCATEGORY_ICONS } from '~/utils/categories'
 
 const route = useRoute()
 const toast = useToast()
@@ -122,12 +122,13 @@ async function saveEdits() {
           <UBadge
             color="neutral"
             variant="subtle"
+            :icon="SUBCATEGORY_ICONS[question.subcategory]"
           >
             {{ formatSubcategory(question.subcategory) }}
           </UBadge>
           <UBadge
-            color="neutral"
-            variant="outline"
+            :color="DIFFICULTY_COLORS[question.difficulty]"
+            variant="subtle"
           >
             {{ formatDifficulty(question.difficulty) }}
           </UBadge>
@@ -179,54 +180,58 @@ async function saveEdits() {
       />
     </div>
 
-    <UCard
-      v-if="isEditing || question.hint"
-      class="border-dashed bg-warning/5"
-    >
-      <p class="text-sm font-medium text-muted">
-        Hint
-      </p>
-      <p
-        v-if="!isEditing"
-        class="mt-1"
+    <UCard v-if="isEditing">
+      <UFormField
+        label="Hint"
+        hint="Optional"
+        description="Shown before revealing the answer during practice."
       >
-        {{ question.hint }}
-      </p>
-      <UTextarea
-        v-else
-        v-model="draftHint"
-        class="mt-2 w-full"
-        :rows="3"
-        placeholder="Optional hint"
-      />
+        <UTextarea
+          v-model="draftHint"
+          class="w-full"
+          :rows="3"
+          placeholder="Optional hint"
+        />
+      </UFormField>
     </UCard>
+    <UAlert
+      v-else-if="question.hint"
+      color="warning"
+      variant="subtle"
+      icon="i-lucide-lightbulb"
+      :description="question.hint"
+    />
 
     <UCard>
-      <p class="mb-3 text-sm font-medium text-muted">
-        Ideal Answer
-      </p>
-      <UTextarea
+      <UFormField
         v-if="isEditing"
-        v-model="draftAnswer"
-        class="w-full"
-        :rows="14"
-        placeholder="Write the ideal answer in markdown..."
-      />
-      <div
-        v-else
-        class="prose prose-invert max-w-none"
+        label="Answer"
+        description="Markdown supported."
       >
-        <MarkdownContent
-          v-if="question.answer"
-          :content="question.answer"
+        <UTextarea
+          v-model="draftAnswer"
+          class="w-full"
+          :rows="14"
+          placeholder="Write the ideal answer in markdown..."
         />
-        <p
-          v-else
-          class="text-sm text-muted"
-        >
-          No answer content yet.
+      </UFormField>
+      <template v-else>
+        <p class="mb-3 text-sm font-medium text-muted">
+          Ideal Answer
         </p>
-      </div>
+        <div class="prose prose-invert max-w-none">
+          <MarkdownContent
+            v-if="question.answer"
+            :content="question.answer"
+          />
+          <p
+            v-else
+            class="text-sm text-muted"
+          >
+            No answer content yet.
+          </p>
+        </div>
+      </template>
     </UCard>
   </div>
 </template>

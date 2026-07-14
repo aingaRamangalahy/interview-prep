@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Rating } from '~/types'
-import { formatDifficulty, formatSubcategory } from '~/utils/categories'
+import { DIFFICULTY_COLORS, formatDifficulty, formatSubcategory, SUBCATEGORY_ICONS } from '~/utils/categories'
 
 definePageMeta({
   layout: 'focus'
@@ -50,6 +50,10 @@ function revealAnswer() {
   showAnswer.value = true
 }
 
+function revealHint() {
+  if (currentQuestion.value?.hint) showHint.value = true
+}
+
 function handleRate(rating: Rating) {
   if (!showAnswer.value) return
   rateCurrentQuestion(rating)
@@ -63,37 +67,22 @@ function handleRate(rating: Rating) {
   }
 }
 
-function handleKeydown(event: KeyboardEvent) {
-  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return
-
-  if (event.code === 'Space' && !showAnswer.value) {
-    event.preventDefault()
-    revealAnswer()
-    return
-  }
-
-  if (!showAnswer.value) return
-
-  const ratingMap: Record<string, Rating> = {
-    1: 'again',
-    2: 'hard',
-    3: 'good',
-    4: 'easy'
-  }
-
-  if (ratingMap[event.key]) {
-    event.preventDefault()
-    handleRate(ratingMap[event.key]!)
-  }
-}
-
-onMounted(() => window.addEventListener('keydown', handleKeydown))
-onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
-
 function exitSession() {
   clearSession()
   router.push('/')
 }
+
+defineShortcuts({
+  ' ': () => {
+    if (!showAnswer.value) revealAnswer()
+  },
+  'h': revealHint,
+  'escape': exitSession,
+  '1': () => handleRate('again'),
+  '2': () => handleRate('hard'),
+  '3': () => handleRate('good'),
+  '4': () => handleRate('easy')
+})
 </script>
 
 <template>
@@ -138,6 +127,9 @@ function exitSession() {
           @click="exitSession"
         >
           Exit
+          <UKbd class="ml-1 hidden sm:inline-flex">
+            Esc
+          </UKbd>
         </UButton>
       </div>
       <UProgress
@@ -151,12 +143,13 @@ function exitSession() {
         <UBadge
           color="neutral"
           variant="subtle"
+          :icon="SUBCATEGORY_ICONS[currentQuestion.subcategory]"
         >
           {{ formatSubcategory(currentQuestion.subcategory) }}
         </UBadge>
         <UBadge
-          color="neutral"
-          variant="outline"
+          :color="DIFFICULTY_COLORS[currentQuestion.difficulty]"
+          variant="subtle"
         >
           {{ formatDifficulty(currentQuestion.difficulty) }}
         </UBadge>
@@ -168,51 +161,59 @@ function exitSession() {
     </div>
 
     <div class=" flex flex-col gap-4">
-      <UButton
-        v-if="!showHint && currentQuestion.hint"
-        color="neutral"
-        variant="soft"
-        @click="showHint = true"
+      <UCollapsible
+        v-if="currentQuestion.hint"
+        v-model:open="showHint"
       >
-        Show Hint
-      </UButton>
-
-      <UCard
-        v-if="showHint && currentQuestion.hint"
-        class="border-dashed bg-warning/5"
-      >
-        <p class="text-sm text-muted">
-          {{ currentQuestion.hint }}
-        </p>
-      </UCard>
-
-      <UButton
-        v-if="!showAnswer"
-        size="lg"
-        icon="i-lucide-eye"
-        @click="revealAnswer"
-      >
-        Reveal Answer
-        <UKbd class="ml-2 hidden sm:inline-flex">
-          Space
-        </UKbd>
-      </UButton>
-
-      <UCard
-        v-if="showAnswer"
-        class="prose prose-invert max-w-none"
-      >
-        <MarkdownContent
-          v-if="currentQuestion.answer"
-          :content="currentQuestion.answer"
-        />
-        <p
-          v-else
-          class="text-muted"
+        <UButton
+          color="neutral"
+          variant="soft"
+          :trailing-icon="showHint ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
         >
-          No answer content yet.
-        </p>
-      </UCard>
+          Show Hint
+          <UKbd class="ml-2 hidden sm:inline-flex">
+            H
+          </UKbd>
+        </UButton>
+
+        <template #content>
+          <UAlert
+            class="mt-3"
+            color="warning"
+            variant="subtle"
+            icon="i-lucide-lightbulb"
+            :description="currentQuestion.hint"
+          />
+        </template>
+      </UCollapsible>
+
+      <UCollapsible v-model:open="showAnswer">
+        <UButton
+          size="lg"
+          icon="i-lucide-eye"
+          :trailing-icon="showAnswer ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+        >
+          Reveal Answer
+          <UKbd class="ml-2 hidden sm:inline-flex">
+            Space
+          </UKbd>
+        </UButton>
+
+        <template #content>
+          <UCard class="prose prose-invert mt-3 max-w-none">
+            <MarkdownContent
+              v-if="currentQuestion.answer"
+              :content="currentQuestion.answer"
+            />
+            <p
+              v-else
+              class="text-muted"
+            >
+              No answer content yet.
+            </p>
+          </UCard>
+        </template>
+      </UCollapsible>
     </div>
 
     <div

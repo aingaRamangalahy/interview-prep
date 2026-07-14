@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const route = useRoute()
+const navOpen = ref(false)
 
 const routeTitles: Record<string, string> = {
-  '/': 'Dashboard',
   '/practice': 'Practice',
   '/practice/session': 'Practice Session',
   '/practice/complete': 'Session Complete',
@@ -11,52 +11,61 @@ const routeTitles: Record<string, string> = {
   '/settings': 'Settings'
 }
 
+const isRoot = computed(() => route.path === '/')
+
 const pageTitle = computed(() => {
   if (route.path.startsWith('/questions/')) return 'Question Details'
-  return routeTitles[route.path] || 'Interview Prep'
+  return routeTitles[route.path] || 'javascriptinterview.dev'
 })
 </script>
 
 <template>
-  <div class="relative flex min-h-dvh bg-default">
-    <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      <div class="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
-      <div class="absolute bottom-[-20%] right-[-8%] h-80 w-80 rounded-full bg-success/10 blur-3xl" />
-    </div>
-
-    <AppSidebar />
-
-    <div class="flex min-h-dvh flex-1 flex-col">
-      <header class="sticky top-0 z-30 border-b border-default/80 bg-default/85 px-4 py-3 backdrop-blur lg:px-8">
-        <div class="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
-          <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-muted">
-              Interview Prep
-            </p>
-            <h1 class="text-base font-semibold tracking-tight text-highlighted lg:text-lg">
+  <div class="flex min-h-dvh flex-col bg-default">
+    <header class="sticky top-0 z-30 border-b border-default/80 bg-default/85 px-4 py-3 backdrop-blur lg:px-8">
+      <div class="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
+        <div class="flex items-center gap-1.5">
+          <NuxtLink
+            to="/"
+            class="flex items-center gap-2 rounded-lg transition-opacity hover:opacity-70"
+          >
+            <AppLogo class="size-6 shrink-0" />
+            <span class="font-mono text-sm font-medium tracking-tight text-highlighted lg:text-base">
+              javascriptinterview.dev
+            </span>
+          </NuxtLink>
+          <div
+            v-if="!isRoot"
+            class="hidden items-center gap-1.5 sm:flex"
+          >
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-3.5 shrink-0 text-dimmed"
+            />
+            <span class="text-xs text-muted lg:text-sm">
               {{ pageTitle }}
-            </h1>
-          </div>
-          <div class="flex items-center gap-2">
-            <UBadge
-              color="neutral"
-              variant="soft"
-              class="hidden sm:inline-flex"
-            >
-              Stay consistent
-            </UBadge>
-            <UColorModeButton />
+            </span>
           </div>
         </div>
-      </header>
-
-      <main class="flex-1 overflow-y-auto px-4 py-6 pb-24 lg:px-8 lg:pb-8">
-        <div class="mx-auto max-w-5xl">
-          <slot />
+        <div class="flex items-center gap-1.5">
+          <UColorModeButton />
+          <UButton
+            icon="i-lucide-settings"
+            color="neutral"
+            variant="ghost"
+            square
+            aria-label="Open menu"
+            @click="navOpen = true"
+          />
         </div>
-      </main>
+      </div>
+    </header>
 
-      <AppBottomNav />
-    </div>
+    <main class="flex-1 overflow-y-auto px-4 py-6 lg:px-8">
+      <div class="mx-auto max-w-5xl">
+        <slot />
+      </div>
+    </main>
+
+    <AppNavDrawer v-model:open="navOpen" />
   </div>
 </template>

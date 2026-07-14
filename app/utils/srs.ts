@@ -1,4 +1,4 @@
-import type { AppSettings, PracticeModePreset, Question, Rating, ReviewState, Subcategory } from '~/types'
+import type { AppSettings, PracticeModePreset, Question, Rating, ReviewState } from '~/types'
 import { getSubcategoriesForMode } from '~/utils/categories'
 
 const INTERVAL_DAYS: Record<Rating, number> = {
@@ -15,11 +15,13 @@ export const RATING_CONFIDENCE: Record<Rating, number> = {
   again: 25
 }
 
-export const RATING_LABELS: Record<Rating, { label: string, description: string, emoji: string }> = {
-  easy: { label: 'Easy', description: 'I knew it immediately.', emoji: '🟢' },
-  good: { label: 'Good', description: 'I remembered after thinking.', emoji: '🟡' },
-  hard: { label: 'Hard', description: 'I struggled.', emoji: '🟠' },
-  again: { label: 'Again', description: "I didn't know.", emoji: '🔴' }
+export type RatingColor = 'success' | 'info' | 'warning' | 'error'
+
+export const RATING_LABELS: Record<Rating, { label: string, description: string, icon: string, color: RatingColor }> = {
+  easy: { label: 'Easy', description: 'I knew it immediately.', icon: 'i-lucide-smile-plus', color: 'success' },
+  good: { label: 'Good', description: 'I remembered after thinking.', icon: 'i-lucide-meh', color: 'info' },
+  hard: { label: 'Hard', description: 'I struggled.', icon: 'i-lucide-annoyed', color: 'warning' },
+  again: { label: 'Again', description: 'I didn\'t know.', icon: 'i-lucide-frown', color: 'error' }
 }
 
 export function todayISO(): string {

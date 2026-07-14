@@ -74,11 +74,11 @@ onMounted(() => {
 
     <div class="flex flex-wrap justify-center gap-3">
       <UButton
-        to="/"
+        to="/statistics"
         size="lg"
-        icon="i-lucide-layout-dashboard"
+        icon="i-lucide-chart-line"
       >
-        Dashboard
+        View Statistics
       </UButton>
       <UButton
         to="/practice"
