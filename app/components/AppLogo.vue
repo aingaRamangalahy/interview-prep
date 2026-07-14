@@ -1,0 +1,29 @@
+<template>
+  <svg
+    viewBox="0 0 64 64"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      width="64"
+      height="64"
+      rx="14"
+      fill="#0a0a0a"
+    />
+    <path
+      d="M22 16 L22 39 Q22 47 13 47"
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <rect
+      x="42"
+      y="16"
+      width="8"
+      height="31"
+      rx="4"
+      fill="#ffffff"
+    />
+  </svg>
+</template>

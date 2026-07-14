@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Difficulty, QuestionStatus, Subcategory } from '~/types'
-import { ALL_SUBCATEGORIES, formatDifficulty, formatSubcategory } from '~/utils/categories'
+import { ALL_SUBCATEGORIES, DIFFICULTY_COLORS, formatDifficulty, formatSubcategory, SUBCATEGORY_ICONS } from '~/utils/categories'
 
 const toast = useToast()
 const search = ref('')
@@ -26,6 +26,17 @@ const { filterQuestions, getQuestionStatus } = useStatistics()
 const filteredQuestions = computed(() =>
   filterQuestions(search.value, subcategory.value, difficulty.value, status.value)
 )
+
+const hasActiveFilters = computed(() =>
+  search.value.trim() !== '' || subcategory.value !== 'all' || difficulty.value !== 'all' || status.value !== 'all'
+)
+
+function clearFilters() {
+  search.value = ''
+  subcategory.value = 'all'
+  difficulty.value = 'all'
+  status.value = 'all'
+}
 
 const jsonExample = `[
   {
@@ -145,16 +156,28 @@ async function handleImportJson() {
 
     <UCard>
       <div class="space-y-3">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-3">
           <p class="text-sm font-medium text-highlighted">
             Filter library
           </p>
-          <UBadge
-            color="neutral"
-            variant="soft"
-          >
-            {{ filteredQuestions.length }} result{{ filteredQuestions.length === 1 ? '' : 's' }}
-          </UBadge>
+          <div class="flex items-center gap-2">
+            <UButton
+              v-if="hasActiveFilters"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              icon="i-lucide-x"
+              @click="clearFilters"
+            >
+              Clear
+            </UButton>
+            <UBadge
+              color="neutral"
+              variant="soft"
+            >
+              {{ filteredQuestions.length }} result{{ filteredQuestions.length === 1 ? '' : 's' }}
+            </UBadge>
+          </div>
         </div>
 
         <div class="grid gap-3 sm:grid-cols-2">
@@ -215,6 +238,16 @@ async function handleImportJson() {
       <p class="text-sm text-muted">
         No questions match these filters.
       </p>
+      <UButton
+        v-if="hasActiveFilters"
+        class="mt-3"
+        color="neutral"
+        variant="soft"
+        size="sm"
+        @click="clearFilters"
+      >
+        Clear filters
+      </UButton>
     </div>
 
     <div
@@ -227,14 +260,26 @@ async function handleImportJson() {
         :to="`/questions/${question.id}`"
         class="group flex items-center justify-between gap-4 rounded-2xl border border-default bg-elevated/20 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-elevated/45"
       >
-        <div class="min-w-0 space-y-1">
+        <div class="min-w-0 space-y-1.5">
           <p class="truncate font-medium text-highlighted">
             {{ question.title }}
           </p>
-          <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
-            <span>{{ formatSubcategory(question.subcategory) }}</span>
-            <span>·</span>
-            <span>{{ formatDifficulty(question.difficulty) }}</span>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <UBadge
+              color="neutral"
+              variant="subtle"
+              size="sm"
+              :icon="SUBCATEGORY_ICONS[question.subcategory]"
+            >
+              {{ formatSubcategory(question.subcategory) }}
+            </UBadge>
+            <UBadge
+              :color="DIFFICULTY_COLORS[question.difficulty]"
+              variant="subtle"
+              size="sm"
+            >
+              {{ formatDifficulty(question.difficulty) }}
+            </UBadge>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -277,42 +322,68 @@ async function handleImportJson() {
 
             <div
               v-if="createMode === 'single'"
-              class="space-y-3"
+              class="space-y-4"
             >
-              <UInput
-                v-model="newTitle"
-                placeholder="Question title"
-              />
+              <UFormField label="Title">
+                <UInput
+                  v-model="newTitle"
+                  class="w-full"
+                  placeholder="Question title"
+                />
+              </UFormField>
               <div class="grid gap-3 sm:grid-cols-2">
-                <USelect
-                  v-model="newSubcategory"
-                  :items="ALL_SUBCATEGORIES.map(s => ({ label: formatSubcategory(s), value: s }))"
-                />
-                <USelect
-                  v-model="newDifficulty"
-                  :items="[
-                    { label: 'Easy', value: 'easy' },
-                    { label: 'Medium', value: 'medium' },
-                    { label: 'Hard', value: 'hard' }
-                  ]"
-                />
+                <UFormField label="Topic">
+                  <USelect
+                    v-model="newSubcategory"
+                    class="w-full"
+                    :items="ALL_SUBCATEGORIES.map(s => ({ label: formatSubcategory(s), value: s }))"
+                  />
+                </UFormField>
+                <UFormField label="Difficulty">
+                  <USelect
+                    v-model="newDifficulty"
+                    class="w-full"
+                    :items="[
+                      { label: 'Easy', value: 'easy' },
+                      { label: 'Medium', value: 'medium' },
+                      { label: 'Hard', value: 'hard' }
+                    ]"
+                  />
+                </UFormField>
               </div>
-              <UInput
-                v-model="newTags"
-                placeholder="Tags (comma separated, optional)"
-              />
-              <UTextarea
-                v-model="newHint"
-                class="w-full"
-                :rows="3"
-                placeholder="Hint (optional)"
-              />
-              <UTextarea
-                v-model="newAnswer"
-                class="w-full"
-                :rows="10"
-                placeholder="Ideal answer (markdown supported)"
-              />
+              <UFormField
+                label="Tags"
+                hint="Optional"
+              >
+                <UInput
+                  v-model="newTags"
+                  class="w-full"
+                  placeholder="Comma separated, e.g. closures, core-concepts"
+                />
+              </UFormField>
+              <UFormField
+                label="Hint"
+                hint="Optional"
+                description="Shown before revealing the answer during practice."
+              >
+                <UTextarea
+                  v-model="newHint"
+                  class="w-full"
+                  :rows="3"
+                  placeholder="Optional hint"
+                />
+              </UFormField>
+              <UFormField
+                label="Answer"
+                description="Markdown supported."
+              >
+                <UTextarea
+                  v-model="newAnswer"
+                  class="w-full"
+                  :rows="10"
+                  placeholder="Ideal answer (markdown supported)"
+                />
+              </UFormField>
               <div class="flex justify-end gap-2">
                 <UButton
                   color="neutral"

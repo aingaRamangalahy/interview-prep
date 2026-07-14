@@ -1,15 +1,34 @@
-import type { Category, PracticeModePreset, Subcategory } from '~/types'
+import type { Category, Difficulty, PracticeModePreset, Subcategory } from '~/types'
+import type { RatingColor } from './srs'
 
 export const SUBCATEGORY_LABELS: Record<Subcategory, string> = {
-  javascript: 'JavaScript',
-  typescript: 'TypeScript',
-  vue: 'Vue',
-  angular: 'Angular',
-  node: 'Node.js',
+  'javascript': 'JavaScript',
+  'typescript': 'TypeScript',
+  'vue': 'Vue',
+  'angular': 'Angular',
+  'node': 'Node.js',
   'problem-solving': 'Problem Solving',
-  behavioral: 'Behavioral',
-  communication: 'Communication',
-  career: 'Career'
+  'behavioral': 'Behavioral',
+  'communication': 'Communication',
+  'career': 'Career'
+}
+
+export const SUBCATEGORY_ICONS: Record<Subcategory, string> = {
+  'javascript': 'i-simple-icons-javascript',
+  'typescript': 'i-simple-icons-typescript',
+  'vue': 'i-simple-icons-vuedotjs',
+  'angular': 'i-simple-icons-angular',
+  'node': 'i-simple-icons-nodedotjs',
+  'problem-solving': 'i-lucide-puzzle',
+  'behavioral': 'i-lucide-users',
+  'communication': 'i-lucide-message-circle',
+  'career': 'i-lucide-briefcase'
+}
+
+export const DIFFICULTY_COLORS: Record<Difficulty, RatingColor> = {
+  easy: 'success',
+  medium: 'warning',
+  hard: 'error'
 }
 
 export const TECHNICAL_SUBCATEGORIES: Subcategory[] = [

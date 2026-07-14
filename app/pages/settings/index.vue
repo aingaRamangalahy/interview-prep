@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PracticeModePreset, Subcategory } from '~/types'
-import { ALL_SUBCATEGORIES, formatSubcategory, PRACTICE_MODE_OPTIONS } from '~/utils/categories'
+import { ALL_SUBCATEGORIES, PRACTICE_MODE_OPTIONS } from '~/utils/categories'
 
 const { state, updateSettings, exportState, importState, resetProgress } = useReviewState()
 
@@ -11,7 +11,7 @@ const importText = ref('')
 const showResetConfirm = ref(false)
 
 watch(sessionSize, (value) => {
-  updateSettings({ sessionSize: Math.min(20, Math.max(1, value)) })
+  updateSettings({ sessionSize: value })
 })
 
 watch(defaultMode, (value) => {
@@ -21,14 +21,6 @@ watch(defaultMode, (value) => {
 watch(customSubcategories, (value) => {
   updateSettings({ customSubcategories: [...value] })
 }, { deep: true })
-
-function toggleSubcategory(subcategory: Subcategory) {
-  if (customSubcategories.value.includes(subcategory)) {
-    customSubcategories.value = customSubcategories.value.filter(s => s !== subcategory)
-  } else {
-    customSubcategories.value = [...customSubcategories.value, subcategory]
-  }
-}
 
 function downloadExport() {
   const blob = new Blob([exportState()], { type: 'application/json' })
@@ -76,29 +68,35 @@ function handleReset() {
     </section>
 
     <UCard>
-      <div class="space-y-4">
-        <div>
-          <label class="text-sm font-medium">Session size</label>
-          <UInput
-            v-model.number="sessionSize"
-            type="number"
-            min="1"
-            max="20"
-            class="mt-2"
-          />
-          <p class="mt-1 text-xs text-muted">
-            Recommended: 5-12 questions for a focused daily session.
-          </p>
-        </div>
+      <div class="mb-4 flex items-center gap-2 text-highlighted">
+        <UIcon
+          name="i-lucide-sliders-horizontal"
+          class="size-4 shrink-0"
+        />
+        <p class="font-medium">
+          Practice defaults
+        </p>
+      </div>
 
-        <div>
-          <label class="text-sm font-medium">Default practice mode</label>
+      <div class="space-y-5">
+        <UFormField
+          label="Session size"
+          description="Recommended: 5-12 questions for a focused daily session."
+        >
+          <UInputNumber
+            v-model="sessionSize"
+            :min="1"
+            :max="20"
+          />
+        </UFormField>
+
+        <UFormField label="Default practice mode">
           <USelect
             v-model="defaultMode"
-            class="mt-2"
+            class="w-full"
             :items="PRACTICE_MODE_OPTIONS.map(o => ({ label: o.label, value: o.value }))"
           />
-        </div>
+        </UFormField>
       </div>
     </UCard>
 
@@ -106,30 +104,41 @@ function handleReset() {
       v-if="defaultMode === 'custom'"
       class="border-primary/20"
     >
-      <p class="mb-3 text-sm font-medium">
-        Custom topics
-      </p>
-      <div class="flex flex-wrap gap-2">
-        <UButton
-          v-for="subcategory in ALL_SUBCATEGORIES"
-          :key="subcategory"
-          size="sm"
-          :color="customSubcategories.includes(subcategory) ? 'primary' : 'neutral'"
-          :variant="customSubcategories.includes(subcategory) ? 'solid' : 'soft'"
-          @click="toggleSubcategory(subcategory)"
-        >
-          {{ formatSubcategory(subcategory) }}
-        </UButton>
+      <div class="mb-4 flex items-center gap-2 text-highlighted">
+        <UIcon
+          name="i-lucide-tags"
+          class="size-4 shrink-0"
+        />
+        <p class="font-medium">
+          Custom topics
+        </p>
       </div>
+      <p class="mb-3 text-sm text-muted">
+        Choose one or more subcategories to combine, e.g. JavaScript + TypeScript.
+      </p>
+      <TopicChips
+        v-model="customSubcategories"
+        :options="ALL_SUBCATEGORIES"
+      />
     </UCard>
 
     <UCard>
-      <div class="space-y-4">
+      <div class="mb-4 flex items-center gap-2 text-highlighted">
+        <UIcon
+          name="i-lucide-database"
+          class="size-4 shrink-0"
+        />
+        <p class="font-medium">
+          Data
+        </p>
+      </div>
+
+      <div class="space-y-5">
         <div>
-          <p class="font-medium">
+          <p class="text-sm font-medium text-highlighted">
             Export progress
           </p>
-          <p class="text-sm text-muted">
+          <p class="mt-1 text-sm text-muted">
             Download your review history and streak data from MongoDB.
           </p>
           <UButton
@@ -145,16 +154,13 @@ function handleReset() {
 
         <USeparator />
 
-        <div>
-          <p class="font-medium">
-            Import progress
-          </p>
-          <p class="mt-1 text-sm text-muted">
-            Paste the JSON from a previous export and restore your history.
-          </p>
+        <UFormField
+          label="Import progress"
+          description="Paste the JSON from a previous export and restore your history."
+        >
           <UTextarea
             v-model="importText"
-            class="mt-2"
+            class="w-full"
             :rows="4"
             placeholder="Paste exported JSON..."
           />
@@ -167,14 +173,20 @@ function handleReset() {
           >
             Import
           </UButton>
-        </div>
+        </UFormField>
       </div>
     </UCard>
 
     <UCard class="border-error/25">
-      <p class="font-medium text-error">
-        Danger zone
-      </p>
+      <div class="mb-1 flex items-center gap-2 text-error">
+        <UIcon
+          name="i-lucide-triangle-alert"
+          class="size-4 shrink-0"
+        />
+        <p class="font-medium">
+          Danger zone
+        </p>
+      </div>
       <p class="mt-1 text-sm text-muted">
         Reset all review progress. Settings are kept.
       </p>

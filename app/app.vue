@@ -4,7 +4,7 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
   ],
   link: [
-    { rel: 'icon', href: '/favicon.ico' }
+    { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }
   ],
   htmlAttrs: {
     lang: 'en'
@@ -12,7 +12,7 @@ useHead({
 })
 
 useSeoMeta({
-  title: 'Interview Prep',
+  title: 'javascriptinterview.dev',
   description: 'Daily interview practice with spaced repetition.'
 })
 </script>

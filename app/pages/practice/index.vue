@@ -1,16 +1,43 @@
 <script setup lang="ts">
-import type { PracticeModePreset } from '~/types'
-import { PRACTICE_MODE_OPTIONS } from '~/utils/categories'
+import type { PracticeModePreset, Subcategory } from '~/types'
+import { ALL_SUBCATEGORIES, PRACTICE_MODE_OPTIONS } from '~/utils/categories'
 
 const { state, updateSettings } = useReviewState()
 const { pending } = useQuestions()
 const { startSession, dueCountForMode } = usePracticeSession()
 
+const QUICK_MODES: PracticeModePreset[] = ['mixed', 'technical', 'non-technical']
+const quickPresets = computed(() => PRACTICE_MODE_OPTIONS.filter(option => QUICK_MODES.includes(option.value)))
+
 const selectedMode = ref<PracticeModePreset>(state.value.settings.defaultPracticeMode)
+const selectedTopics = ref<Subcategory[]>(initialTopics())
+
+function initialTopics(): Subcategory[] {
+  const mode = state.value.settings.defaultPracticeMode
+  if (mode === 'custom') return [...state.value.settings.customSubcategories]
+  if ((ALL_SUBCATEGORIES as string[]).includes(mode)) return [mode as Subcategory]
+  return []
+}
 
 watch(selectedMode, (mode) => {
   updateSettings({ defaultPracticeMode: mode })
 })
+
+watch(selectedTopics, (topics) => {
+  updateSettings({ customSubcategories: [...topics] })
+}, { deep: true })
+
+const isCustomActive = computed(() => selectedMode.value === 'custom')
+
+function selectPreset(mode: PracticeModePreset) {
+  selectedMode.value = mode
+  selectedTopics.value = []
+}
+
+function handleTopicsUpdate(topics: Subcategory[]) {
+  selectedTopics.value = topics
+  selectedMode.value = topics.length > 0 ? 'custom' : 'mixed'
+}
 
 const dueCount = computed(() => dueCountForMode(selectedMode.value))
 
@@ -33,14 +60,14 @@ function beginSession() {
       </p>
     </section>
 
-    <div class="grid gap-3">
+    <div class="grid gap-3 sm:grid-cols-3">
       <button
-        v-for="option in PRACTICE_MODE_OPTIONS"
+        v-for="option in quickPresets"
         :key="option.value"
         type="button"
         class="rounded-2xl border border-default bg-elevated/30 p-4 text-left transition-all hover:border-primary/35 hover:bg-elevated/55"
-        :class="selectedMode === option.value ? 'border-primary ring-1 ring-primary/35 bg-primary/6' : ''"
-        @click="selectedMode = option.value"
+        :class="!isCustomActive && selectedMode === option.value ? 'border-primary ring-1 ring-primary/35 bg-primary/6' : ''"
+        @click="selectPreset(option.value)"
       >
         <div class="flex items-start justify-between gap-4">
           <div>
@@ -55,12 +82,41 @@ function beginSession() {
             </div>
           </div>
           <UIcon
-            v-if="selectedMode === option.value"
+            v-if="!isCustomActive && selectedMode === option.value"
             name="i-lucide-check-circle-2"
-            class="size-5 text-primary"
+            class="size-5 shrink-0 text-primary"
           />
         </div>
       </button>
+    </div>
+
+    <div
+      class="space-y-3 rounded-2xl border border-default/80 bg-elevated/30 p-4 sm:p-5"
+      :class="isCustomActive ? 'border-primary/35 bg-primary/6' : ''"
+    >
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-medium text-highlighted">
+            Or combine specific topics
+          </p>
+          <p class="text-xs text-muted">
+            Pick one or more, e.g. JavaScript + TypeScript.
+          </p>
+        </div>
+        <UBadge
+          v-if="isCustomActive"
+          color="primary"
+          variant="subtle"
+        >
+          Custom
+        </UBadge>
+      </div>
+
+      <TopicChips
+        :model-value="selectedTopics"
+        :options="ALL_SUBCATEGORIES"
+        @update:model-value="handleTopicsUpdate"
+      />
     </div>
 
     <UCard class="border-primary/20">
