@@ -17,7 +17,8 @@ const DEFAULT_STATE: AppState = {
     sessionSize: 5,
     defaultPracticeMode: 'mixed',
     customSubcategories: ['javascript', 'vue', 'behavioral']
-  }
+  },
+  mutedQuestionIds: []
 }
 
 export async function getUserState(userId: string): Promise<AppState> {
@@ -28,6 +29,11 @@ export async function getUserState(userId: string): Promise<AppState> {
 
   if (!doc) return { ...DEFAULT_STATE }
   return { ...DEFAULT_STATE, ...doc.state }
+}
+
+export async function deleteUserState(userId: string): Promise<void> {
+  const database = await getDb()
+  await database.collection<UserStateDocument>('user_states').deleteOne({ userId })
 }
 
 export async function saveUserState(userId: string, state: AppState): Promise<AppState> {

@@ -1,13 +1,12 @@
 import type { AppState } from '~/types'
-import { saveUserState } from '../../utils/user-state'
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
+  const user = await requireUser(event)
   const body = await readBody<AppState>(event)
 
   if (!body || typeof body !== 'object') {
     throw createError({ statusCode: 400, statusMessage: 'Invalid state payload' })
   }
 
-  return saveUserState(config.appUserId, body)
+  return saveUserState(user._id.toString(), body)
 })

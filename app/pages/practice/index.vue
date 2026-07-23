@@ -2,9 +2,20 @@
 import type { PracticeModePreset, Subcategory } from '~/types'
 import { ALL_SUBCATEGORIES, PRACTICE_MODE_OPTIONS } from '~/utils/categories'
 
+useSiteSeo({
+  title: 'Practice Modes',
+  description: 'Choose a practice mode — mixed, technical, non-technical, or topic-specific — and start a spaced-repetition interview session.',
+  path: '/practice',
+  og: {
+    title: 'Practice interview questions',
+    description: 'Pick a mode and drill interview questions with spaced repetition.',
+    eyebrow: 'Practice'
+  }
+})
+
 const { state, updateSettings } = useReviewState()
 const { pending } = useQuestions()
-const { startSession, dueCountForMode } = usePracticeSession()
+const { startSession, dueCountForMode, availableCountForMode } = usePracticeSession()
 
 const QUICK_MODES: PracticeModePreset[] = ['mixed', 'technical', 'non-technical']
 const quickPresets = computed(() => PRACTICE_MODE_OPTIONS.filter(option => QUICK_MODES.includes(option.value)))
@@ -40,6 +51,7 @@ function handleTopicsUpdate(topics: Subcategory[]) {
 }
 
 const dueCount = computed(() => dueCountForMode(selectedMode.value))
+const availableCount = computed(() => availableCountForMode(selectedMode.value))
 
 function beginSession() {
   useState<unknown>('session-summary', () => null).value = null
@@ -142,7 +154,19 @@ function beginSession() {
       </div>
 
       <p
-        v-if="dueCount === 0 && !pending"
+        v-if="availableCount === 0 && !pending"
+        class="mt-3 text-sm text-warning"
+      >
+        You've muted every question in this mode.
+        <NuxtLink
+          to="/questions"
+          class="underline"
+        >
+          Unmute some?
+        </NuxtLink>
+      </p>
+      <p
+        v-else-if="dueCount === 0 && !pending"
         class="mt-3 text-sm text-muted"
       >
         No questions are due for this mode yet. Try a different mode or add more questions.

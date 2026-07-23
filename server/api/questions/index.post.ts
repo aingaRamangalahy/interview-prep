@@ -65,6 +65,8 @@ function normalizeQuestion(input: QuestionPayload, index: number): CreateQuestio
 }
 
 export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
+
   const body = await readBody<QuestionPayload | { questions?: QuestionPayload[] } | QuestionPayload[]>(event)
 
   let payload: QuestionPayload[] = []

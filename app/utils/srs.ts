@@ -81,11 +81,18 @@ export function isMastered(review: ReviewState | undefined): boolean {
 export function filterQuestionsByMode(
   questions: Question[],
   mode: PracticeModePreset,
-  settings: AppSettings
+  settings: AppSettings,
+  mutedQuestionIds: string[] = []
 ): Question[] {
   const subcategories = getSubcategoriesForMode(mode, settings.customSubcategories)
-  if (!subcategories) return questions
-  return questions.filter(q => subcategories.includes(q.subcategory))
+  const muted = new Set(mutedQuestionIds)
+
+  return questions.filter((q) => {
+    if (q.status === 'archived') return false
+    if (muted.has(q.id)) return false
+    if (subcategories && !subcategories.includes(q.subcategory)) return false
+    return true
+  })
 }
 
 export function selectSessionQuestions(

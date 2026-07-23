@@ -3,6 +3,12 @@ definePageMeta({
   layout: 'focus'
 })
 
+useSiteSeo({
+  title: 'Session Complete',
+  description: 'Practice session summary.',
+  noindex: true
+})
+
 const sessionSummary = useState<{
   questionsCount: number
   averageConfidence: number

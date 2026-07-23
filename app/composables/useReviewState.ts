@@ -1,4 +1,5 @@
 import type { AppState, AppSettings, SessionRecord } from '~/types'
+import { clearGuestState, readGuestState, writeGuestState } from '~/utils/guest-state'
 import { createReviewState, updateStreak } from '~/utils/srs'
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -14,7 +15,8 @@ function createDefaultState(): AppState {
     lastSessionDate: null,
     currentStreak: 0,
     longestStreak: 0,
-    settings: { ...DEFAULT_SETTINGS }
+    settings: { ...DEFAULT_SETTINGS },
+    mutedQuestionIds: []
   }
 }
 
@@ -24,9 +26,19 @@ export function useReviewState() {
   const state = useState<AppState>('review-state', createDefaultState)
   const hydrated = useState('review-state-hydrated', () => false)
   const syncing = useState('review-state-syncing', () => false)
+  const { isVisitor } = useAuth()
 
   async function hydrate() {
     if (!import.meta.client || hydrated.value) return
+
+    // Ensure auth resolves first — visitors persist to localStorage instead of the server.
+    const { data: authUser } = await useAsyncData('auth-me', fetchAuthUser, { default: () => null })
+
+    if (!authUser.value) {
+      state.value = { ...createDefaultState(), ...(readGuestState() ?? {}) }
+      hydrated.value = true
+      return
+    }
 
     try {
       const data = await $fetch<AppState>('/api/state')
@@ -43,6 +55,11 @@ export function useReviewState() {
 
     if (persistTimer) clearTimeout(persistTimer)
     persistTimer = setTimeout(async () => {
+      if (isVisitor.value) {
+        writeGuestState(state.value)
+        return
+      }
+
       syncing.value = true
       try {
         await $fetch('/api/state', {
@@ -90,17 +107,36 @@ export function useReviewState() {
     state.value.longestStreak = streak.longestStreak
   }
 
+  function isMuted(questionId: string) {
+    return state.value.mutedQuestionIds.includes(questionId)
+  }
+
+  function toggleMute(questionId: string) {
+    const muted = new Set(state.value.mutedQuestionIds)
+    if (muted.has(questionId)) muted.delete(questionId)
+    else muted.add(questionId)
+    state.value.mutedQuestionIds = Array.from(muted)
+  }
+
   function exportState(): string {
     return JSON.stringify(state.value, null, 2)
+  }
+
+  async function persistNow() {
+    if (isVisitor.value) {
+      writeGuestState(state.value)
+      return
+    }
+    await $fetch('/api/state', {
+      method: 'PUT',
+      body: state.value
+    })
   }
 
   async function importState(json: string) {
     const parsed = JSON.parse(json) as AppState
     state.value = { ...createDefaultState(), ...parsed }
-    await $fetch('/api/state', {
-      method: 'PUT',
-      body: state.value
-    })
+    await persistNow()
   }
 
   async function resetProgress() {
@@ -108,10 +144,8 @@ export function useReviewState() {
       ...createDefaultState(),
       settings: state.value.settings
     }
-    await $fetch('/api/state', {
-      method: 'PUT',
-      body: state.value
-    })
+    if (isVisitor.value) clearGuestState()
+    await persistNow()
   }
 
   return {
@@ -123,6 +157,8 @@ export function useReviewState() {
     ensureReview,
     updateSettings,
     recordSession,
+    isMuted,
+    toggleMute,
     exportState,
     importState,
     resetProgress

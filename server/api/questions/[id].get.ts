@@ -11,5 +11,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Question not found' })
   }
 
+  const user = await getOptionalUser(event)
+  if (question.status === 'archived' && user?.role !== 'admin') {
+    throw createError({ statusCode: 404, statusMessage: 'Question not found' })
+  }
+
   return question
 })

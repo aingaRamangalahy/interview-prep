@@ -2,6 +2,8 @@ import type { Category, Difficulty, Question, Subcategory } from '~/types'
 import { getCategoryForSubcategory } from '~/utils/categories'
 import { getDb } from './db'
 
+export type QuestionContentStatus = 'active' | 'archived'
+
 export interface QuestionDocument {
   slug: string
   title: string
@@ -13,6 +15,9 @@ export interface QuestionDocument {
   source?: string
   notes?: string
   answer: string
+  status?: QuestionContentStatus
+  archivedAt?: Date
+  archivedBy?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -41,15 +46,19 @@ function toQuestion(doc: QuestionDocument): Question {
     source: doc.source,
     notes: doc.notes,
     answer: doc.answer,
-    path: `/${doc.slug}`
+    path: `/questions/${doc.slug}`,
+    status: doc.status ?? 'active',
+    archivedAt: doc.archivedAt?.toISOString(),
+    archivedBy: doc.archivedBy
   }
 }
 
-export async function listQuestions(): Promise<Question[]> {
+export async function listQuestions(options: { includeArchived?: boolean } = {}): Promise<Question[]> {
   const database = await getDb()
+  const filter = options.includeArchived ? {} : { status: { $ne: 'archived' as const } }
   const docs = await database
     .collection<QuestionDocument>('questions')
-    .find()
+    .find(filter)
     .sort({ subcategory: 1, title: 1 })
     .toArray()
 
@@ -65,6 +74,33 @@ export async function getQuestionBySlug(slug: string): Promise<Question | null> 
   return doc ? toQuestion(doc) : null
 }
 
+export async function setQuestionStatus(
+  slug: string,
+  status: QuestionContentStatus,
+  adminId: string
+): Promise<Question | null> {
+  const database = await getDb()
+  const now = new Date()
+
+  const update = status === 'archived'
+    ? { $set: { status, archivedAt: now, archivedBy: adminId, updatedAt: now } }
+    : { $set: { status, updatedAt: now }, $unset: { archivedAt: '', archivedBy: '' } as Record<string, ''> }
+
+  const result = await database.collection<QuestionDocument>('questions').findOneAndUpdate(
+    { slug },
+    update,
+    { returnDocument: 'after' }
+  )
+
+  return result ? toQuestion(result) : null
+}
+
+export async function deleteQuestionBySlug(slug: string): Promise<boolean> {
+  const database = await getDb()
+  const result = await database.collection<QuestionDocument>('questions').deleteOne({ slug })
+  return result.deletedCount > 0
+}
+
 export async function upsertQuestion(
   input: Omit<QuestionDocument, 'createdAt' | 'updatedAt'>
 ) {
@@ -75,7 +111,7 @@ export async function upsertQuestion(
     { slug: input.slug },
     {
       $set: { ...input, updatedAt: now },
-      $setOnInsert: { createdAt: now }
+      $setOnInsert: { createdAt: now, status: 'active' }
     },
     { upsert: true }
   )
@@ -180,7 +216,8 @@ export async function createOrUpdateQuestions(
           updatedAt: now
         },
         $setOnInsert: {
-          createdAt: now
+          createdAt: now,
+          status: 'active'
         }
       },
       { upsert: true }
