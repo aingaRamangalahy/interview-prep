@@ -3,13 +3,19 @@ import { DIFFICULTY_COLORS, formatDifficulty, formatSubcategory, SUBCATEGORY_ICO
 
 const route = useRoute()
 const toast = useToast()
-const { questions, pending, updateQuestion } = useQuestions()
+const { questions, pending, updateQuestion, setQuestionStatus } = useQuestions()
+// Await the shared questions payload so SSR meta/OG see the question on first paint.
+await useAsyncData('questions', fetchQuestions, { default: () => [] })
 const { getQuestionStatus } = useStatistics()
+const { isMuted, toggleMute } = useReviewState()
+const { isAdmin, isVisitor } = useAuth()
 const isEditing = ref(false)
 const isSaving = ref(false)
 const draftTitle = ref('')
 const draftHint = ref('')
 const draftAnswer = ref('')
+const isArchiving = ref(false)
+const showArchiveConfirm = ref(false)
 
 const questionId = computed(() => {
   const param = route.params.slug
@@ -19,6 +25,8 @@ const questionId = computed(() => {
 const question = computed(() =>
   questions.value?.find(q => q.id === questionId.value)
 )
+
+useQuestionSeo(question)
 
 watch(question, (value) => {
   if (!value) return
@@ -73,6 +81,26 @@ async function saveEdits() {
     toast.add({ title: 'Failed to update question', color: 'error' })
   } finally {
     isSaving.value = false
+  }
+}
+
+async function toggleArchive() {
+  if (!question.value || isArchiving.value) return
+
+  const nextStatus = question.value.status === 'archived' ? 'active' : 'archived'
+
+  try {
+    isArchiving.value = true
+    await setQuestionStatus(question.value.id, nextStatus)
+    showArchiveConfirm.value = false
+    toast.add({
+      title: nextStatus === 'archived' ? 'Question archived for all users' : 'Question restored',
+      color: nextStatus === 'archived' ? 'warning' : 'success'
+    })
+  } catch {
+    toast.add({ title: 'Failed to update question status', color: 'error' })
+  } finally {
+    isArchiving.value = false
   }
 }
 </script>
@@ -133,11 +161,58 @@ async function saveEdits() {
             {{ formatDifficulty(question.difficulty) }}
           </UBadge>
           <QuestionStatusBadge :status="getQuestionStatus(question.id)" />
+          <UBadge
+            v-if="isAdmin && question.status === 'archived'"
+            color="neutral"
+            variant="soft"
+            icon="i-lucide-archive"
+          >
+            Archived
+          </UBadge>
+          <UBadge
+            v-if="!isVisitor && isMuted(question.id)"
+            color="neutral"
+            variant="soft"
+            icon="i-lucide-bell-off"
+          >
+            Muted
+          </UBadge>
         </div>
 
         <div class="flex items-center gap-2">
           <UButton
-            v-if="!isEditing"
+            v-if="!isVisitor"
+            color="neutral"
+            variant="soft"
+            :icon="isMuted(question.id) ? 'i-lucide-bell' : 'i-lucide-bell-off'"
+            size="sm"
+            @click="toggleMute(question.id)"
+          >
+            {{ isMuted(question.id) ? 'Unmute' : 'Mute' }}
+          </UButton>
+          <UButton
+            v-if="isAdmin && question.status === 'archived'"
+            color="success"
+            variant="soft"
+            icon="i-lucide-archive-restore"
+            size="sm"
+            :loading="isArchiving"
+            @click="toggleArchive"
+          >
+            Restore
+          </UButton>
+          <UButton
+            v-else-if="isAdmin"
+            color="warning"
+            variant="soft"
+            icon="i-lucide-archive"
+            size="sm"
+            @click="showArchiveConfirm = true"
+          >
+            Archive
+          </UButton>
+          <UButton
+            v-if="isAdmin && !isEditing"
             color="neutral"
             variant="soft"
             icon="i-lucide-pencil"
@@ -146,7 +221,7 @@ async function saveEdits() {
           >
             Edit
           </UButton>
-          <template v-else>
+          <template v-else-if="isAdmin">
             <UButton
               color="neutral"
               variant="ghost"
@@ -219,7 +294,7 @@ async function saveEdits() {
         <p class="mb-3 text-sm font-medium text-muted">
           Ideal Answer
         </p>
-        <div class="prose prose-invert max-w-none">
+        <div class="prose dark:prose-invert max-w-none">
           <MarkdownContent
             v-if="question.answer"
             :content="question.answer"
@@ -233,5 +308,35 @@ async function saveEdits() {
         </div>
       </template>
     </UCard>
+
+    <UModal v-model:open="showArchiveConfirm">
+      <template #content>
+        <UCard>
+          <p class="font-medium text-highlighted">
+            Archive for all users?
+          </p>
+          <p class="mt-2 text-sm text-muted">
+            This hides the question from everyone's library and practice sessions. It can be restored later, and
+            existing progress/history is kept. This is different from Mute, which only affects you.
+          </p>
+          <div class="mt-4 flex justify-end gap-2">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              @click="showArchiveConfirm = false"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              color="warning"
+              :loading="isArchiving"
+              @click="toggleArchive"
+            >
+              Archive
+            </UButton>
+          </div>
+        </UCard>
+      </template>
+    </UModal>
   </div>
 </template>

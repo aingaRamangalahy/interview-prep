@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { estimateSessionMinutes } from '~/utils/srs'
 
+useSiteSeo({
+  title: 'Daily Interview Practice',
+  description: 'Start a daily interview practice session with spaced repetition. Track due questions, streaks, and weak topics.',
+  path: '/',
+  og: {
+    title: 'Master your next JavaScript interview',
+    description: 'Daily spaced-repetition practice for JavaScript, TypeScript, Vue, and behavioral interviews.',
+    eyebrow: 'Daily Practice'
+  }
+})
+
 const { state } = useReviewState()
 const { pending, weakTopics } = useStatistics()
 const { dueCountForMode, startSession } = usePracticeSession()

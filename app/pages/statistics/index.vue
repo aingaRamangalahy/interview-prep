@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { SUBCATEGORY_ICONS } from '~/utils/categories'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
+useSiteSeo({
+  title: 'Statistics',
+  description: 'Interview practice statistics.',
+  noindex: true
+})
+
 const {
   pending,
   totalAnswered,

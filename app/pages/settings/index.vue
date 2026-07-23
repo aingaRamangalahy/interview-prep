@@ -2,6 +2,16 @@
 import type { PracticeModePreset, Subcategory } from '~/types'
 import { ALL_SUBCATEGORIES, PRACTICE_MODE_OPTIONS } from '~/utils/categories'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
+useSiteSeo({
+  title: 'Settings',
+  description: 'Manage interview practice settings.',
+  noindex: true
+})
+
 const { state, updateSettings, exportState, importState, resetProgress } = useReviewState()
 
 const sessionSize = ref(state.value.settings.sessionSize)

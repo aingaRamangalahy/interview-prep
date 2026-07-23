@@ -42,6 +42,7 @@ async function ensureIndexes(database: Db) {
       await database.collection('questions').createIndex({ slug: 1 }, { unique: true })
       await database.collection('questions').createIndex({ subcategory: 1, difficulty: 1 })
       await database.collection('user_states').createIndex({ userId: 1 }, { unique: true })
+      await database.collection('users').createIndex({ githubId: 1 }, { unique: true })
       global.__mongoIndexesReady = true
     })()
   }

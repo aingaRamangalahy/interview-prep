@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const navOpen = ref(false)
+const { isVisitor, signIn } = useAuth()
 
 const routeTitles: Record<string, string> = {
   '/practice': 'Practice',
@@ -8,7 +9,8 @@ const routeTitles: Record<string, string> = {
   '/practice/complete': 'Session Complete',
   '/questions': 'Question Library',
   '/statistics': 'Statistics',
-  '/settings': 'Settings'
+  '/settings': 'Settings',
+  '/admin/users': 'Manage Users'
 }
 
 const isRoot = computed(() => route.path === '/')
@@ -47,6 +49,16 @@ const pageTitle = computed(() => {
           </div>
         </div>
         <div class="flex items-center gap-1.5">
+          <UButton
+            v-if="isVisitor"
+            icon="i-simple-icons-github"
+            color="neutral"
+            variant="soft"
+            size="sm"
+            @click="signIn"
+          >
+            Sign in
+          </UButton>
           <UColorModeButton />
           <UButton
             icon="i-lucide-settings"
@@ -67,5 +79,6 @@ const pageTitle = computed(() => {
     </main>
 
     <AppNavDrawer v-model:open="navOpen" />
+    <AppGuestMergePrompt />
   </div>
 </template>

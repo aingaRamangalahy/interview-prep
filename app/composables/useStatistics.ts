@@ -12,6 +12,11 @@ export function useStatistics() {
   const { questions, pending } = useQuestions()
   const { state } = useReviewState()
 
+  const activeQuestions = computed(() => {
+    const muted = new Set(state.value.mutedQuestionIds)
+    return (questions.value ?? []).filter(q => q.status !== 'archived' && !muted.has(q.id))
+  })
+
   function getQuestionStatus(questionId: string): QuestionStatus {
     const review = state.value.reviews[questionId]
     if (isNew(review)) return 'new'
@@ -62,15 +67,16 @@ export function useStatistics() {
       .reduce((sum, session) => sum + session.questionsCount, 0)
   })
 
-  const reviewBacklog = computed(() => {
-    if (!questions.value) return 0
-    return questions.value.filter(q => isDue(state.value.reviews[q.id])).length
-  })
+  const reviewBacklog = computed(() =>
+    activeQuestions.value.filter(q => isDue(state.value.reviews[q.id])).length
+  )
 
   const topicStats = computed(() => {
     const map = new Map<Subcategory, { total: number, confidenceSum: number, rated: number, againCount: number }>()
 
-    for (const question of questions.value ?? []) {
+    // Scope progress % and weak-topic detection to active + unmuted questions only.
+    // Historical totals (answered/mastered) stay based on all reviews above.
+    for (const question of activeQuestions.value) {
       const entry = map.get(question.subcategory) ?? { total: 0, confidenceSum: 0, rated: 0, againCount: 0 }
       entry.total += 1
 

@@ -1,6 +1,4 @@
-import { getUserState } from '../../utils/user-state'
-
-export default defineEventHandler(async () => {
-  const config = useRuntimeConfig()
-  return getUserState(config.appUserId)
+export default defineEventHandler(async (event) => {
+  const user = await requireUser(event)
+  return getUserState(user._id.toString())
 })

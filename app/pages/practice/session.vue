@@ -6,6 +6,12 @@ definePageMeta({
   layout: 'focus'
 })
 
+useSiteSeo({
+  title: 'Practice Session',
+  description: 'Active interview practice session.',
+  noindex: true
+})
+
 const router = useRouter()
 const { state } = useReviewState()
 const { pending } = useQuestions()
@@ -200,7 +206,7 @@ defineShortcuts({
         </UButton>
 
         <template #content>
-          <UCard class="prose prose-invert mt-3 max-w-none">
+          <UCard class="prose dark:prose-invert mt-3 max-w-none">
             <MarkdownContent
               v-if="currentQuestion.answer"
               :content="currentQuestion.answer"

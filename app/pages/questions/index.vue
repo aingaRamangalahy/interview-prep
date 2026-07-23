@@ -2,6 +2,17 @@
 import type { Difficulty, QuestionStatus, Subcategory } from '~/types'
 import { ALL_SUBCATEGORIES, DIFFICULTY_COLORS, formatDifficulty, formatSubcategory, SUBCATEGORY_ICONS } from '~/utils/categories'
 
+useSiteSeo({
+  title: 'Interview Question Library',
+  description: 'Browse JavaScript, TypeScript, Vue, Node.js, and behavioral interview questions with detailed ideal answers.',
+  path: '/questions',
+  og: {
+    title: 'Interview Question Library',
+    description: 'Searchable library of interview questions with ideal answers for JavaScript and frontend roles.',
+    eyebrow: 'Question Library'
+  }
+})
+
 const toast = useToast()
 const search = ref('')
 const subcategory = ref<Subcategory | 'all'>('all')
@@ -22,6 +33,8 @@ const isImporting = ref(false)
 
 const { pending, createQuestions } = useQuestions()
 const { filterQuestions, getQuestionStatus } = useStatistics()
+const { isMuted, toggleMute } = useReviewState()
+const { isAdmin, isVisitor } = useAuth()
 
 const filteredQuestions = computed(() =>
   filterQuestions(search.value, subcategory.value, difficulty.value, status.value)
@@ -141,11 +154,12 @@ async function handleImportJson() {
             Questions
           </h1>
           <p class="text-sm text-muted sm:text-base">
-            Browse your question library stored in MongoDB.
+            Browse JavaScript, TypeScript, Vue, and behavioral interview questions with ideal answers.
           </p>
         </div>
 
         <UButton
+          v-if="isAdmin"
           icon="i-lucide-plus"
           @click="showCreateModal = true"
         >
@@ -254,13 +268,15 @@ async function handleImportJson() {
       v-else
       class="space-y-2"
     >
-      <NuxtLink
+      <div
         v-for="question in filteredQuestions"
         :key="question.id"
-        :to="`/questions/${question.id}`"
         class="group flex items-center justify-between gap-4 rounded-2xl border border-default bg-elevated/20 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-elevated/45"
       >
-        <div class="min-w-0 space-y-1.5">
+        <NuxtLink
+          :to="`/questions/${question.id}`"
+          class="min-w-0 flex-1 space-y-1.5"
+        >
           <p class="truncate font-medium text-highlighted">
             {{ question.title }}
           </p>
@@ -280,16 +296,46 @@ async function handleImportJson() {
             >
               {{ formatDifficulty(question.difficulty) }}
             </UBadge>
+            <UBadge
+              v-if="isAdmin && question.status === 'archived'"
+              color="neutral"
+              variant="soft"
+              size="sm"
+              icon="i-lucide-archive"
+            >
+              Archived
+            </UBadge>
+            <UBadge
+              v-if="!isVisitor && isMuted(question.id)"
+              color="neutral"
+              variant="soft"
+              size="sm"
+              icon="i-lucide-bell-off"
+            >
+              Muted
+            </UBadge>
           </div>
-        </div>
+        </NuxtLink>
         <div class="flex items-center gap-2">
-          <QuestionStatusBadge :status="getQuestionStatus(question.id)" />
-          <UIcon
-            name="i-lucide-chevron-right"
-            class="size-4 text-muted transition-transform group-hover:translate-x-0.5"
+          <UButton
+            v-if="!isVisitor"
+            :icon="isMuted(question.id) ? 'i-lucide-bell' : 'i-lucide-bell-off'"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            square
+            :aria-label="isMuted(question.id) ? 'Unmute question' : 'Mute question'"
+            @click="toggleMute(question.id)"
           />
+          <QuestionStatusBadge :status="getQuestionStatus(question.id)" />
+          <NuxtLink :to="`/questions/${question.id}`">
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-4 text-muted transition-transform group-hover:translate-x-0.5"
+            />
+          </NuxtLink>
         </div>
-      </NuxtLink>
+      </div>
     </div>
 
     <UModal v-model:open="showCreateModal">

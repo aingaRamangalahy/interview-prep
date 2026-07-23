@@ -27,6 +27,8 @@ export type PracticeModePreset =
   | 'problem-solving'
   | 'custom'
 
+export type QuestionContentStatus = 'active' | 'archived'
+
 export interface Question {
   id: string
   title: string
@@ -39,6 +41,9 @@ export interface Question {
   notes?: string
   answer: string
   path: string
+  status: QuestionContentStatus
+  archivedAt?: string
+  archivedBy?: string
 }
 
 export interface ReviewState {
@@ -70,6 +75,7 @@ export interface AppState {
   currentStreak: number
   longestStreak: number
   settings: AppSettings
+  mutedQuestionIds: string[]
 }
 
 export interface ActiveSession {
@@ -81,3 +87,13 @@ export interface ActiveSession {
 }
 
 export type QuestionStatus = 'new' | 'due' | 'mastered' | 'scheduled'
+
+export type UserRole = 'user' | 'admin'
+
+export interface AuthUser {
+  id: string
+  login: string
+  name?: string
+  avatarUrl?: string
+  role: UserRole
+}

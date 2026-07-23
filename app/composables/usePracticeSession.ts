@@ -16,7 +16,8 @@ export function usePracticeSession() {
     const filtered = filterQuestionsByMode(
       questions.value ?? [],
       mode,
-      state.value.settings
+      state.value.settings,
+      state.value.mutedQuestionIds
     )
 
     const selected = selectSessionQuestions(
@@ -108,13 +109,23 @@ export function usePracticeSession() {
     const filtered = filterQuestionsByMode(
       questions.value ?? [],
       mode,
-      state.value.settings
+      state.value.settings,
+      state.value.mutedQuestionIds
     )
     return selectSessionQuestions(
       filtered,
       state.value.reviews,
       state.value.settings.sessionSize,
       false
+    ).length
+  }
+
+  function availableCountForMode(mode: PracticeModePreset) {
+    return filterQuestionsByMode(
+      questions.value ?? [],
+      mode,
+      state.value.settings,
+      state.value.mutedQuestionIds
     ).length
   }
 
@@ -128,6 +139,7 @@ export function usePracticeSession() {
     rateCurrentQuestion,
     completeSession,
     clearSession,
-    dueCountForMode
+    dueCountForMode,
+    availableCountForMode
   }
 }

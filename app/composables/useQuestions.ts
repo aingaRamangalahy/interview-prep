@@ -1,7 +1,9 @@
 import type { Question } from '~/types'
 
 export async function fetchQuestions(): Promise<Question[]> {
-  return $fetch<Question[]>('/api/questions')
+  // Forward cookies during SSR so admins see archived questions on first render too.
+  const requestFetch = useRequestFetch()
+  return requestFetch<Question[]>('/api/questions')
 }
 
 export function useQuestions() {
@@ -78,8 +80,25 @@ export function useQuestions() {
     return response
   }
 
+  async function setQuestionStatus(id: string, status: 'active' | 'archived') {
+    const updated = await $fetch<Question>(`/api/questions/${id}`, {
+      method: 'PATCH',
+      body: { status }
+    })
+
+    if (questions.value?.length) {
+      mergeQuestions([updated])
+    }
+
+    return updated
+  }
+
   function getQuestionById(id: string) {
-    return questions.value?.find(q => q.id === id || q.path === `/${id}`)
+    return questions.value?.find(q =>
+      q.id === id
+      || q.path === `/questions/${id}`
+      || q.path === `/${id}`
+    )
   }
 
   return {
@@ -88,6 +107,7 @@ export function useQuestions() {
     refresh,
     getQuestionById,
     updateQuestion,
-    createQuestions
+    createQuestions,
+    setQuestionStatus
   }
 }
